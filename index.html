@@ -488,6 +488,60 @@
     .ra-quick-rockauto:hover { background: #1e40af !important; }
     .ra-quick-ebay { background: #e53e3e; color: #fff !important; border-color: #e53e3e; }
     .ra-quick-ebay:hover { background: #c53030 !important; }
+    .ra-quick-az { background: #f97316; color: #fff !important; border-color: #f97316; }
+    .ra-quick-az:hover { background: #ea580c !important; }
+
+    /* ── Part category cards ─────────────────────────────────── */
+    .part-cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 10px;
+    }
+
+    .part-cat-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .part-cat-hdr {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.93rem;
+    }
+
+    .part-cat-icon { font-size: 1.15rem; }
+
+    .part-cat-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+
+    .plink {
+      display: inline-block;
+      padding: 5px 11px;
+      border-radius: 7px;
+      text-decoration: none;
+      font-size: 0.77rem;
+      font-weight: 700;
+      color: #fff;
+      transition: opacity .15s, transform .1s;
+      white-space: nowrap;
+    }
+    .plink:hover { opacity: 0.82; transform: translateY(-1px); }
+    .plink-ra { background: #1a56db; }
+    .plink-az { background: #f97316; }
+    .plink-or { background: #dc143c; }
+    .plink-na { background: #004b8d; }
+    .plink-eb { background: #e53238; }
 
     /* ── Parts API error ─────────────────────────────────────── */
     .parts-api-error {
@@ -557,24 +611,7 @@
         </div>
       </div>
 
-      <div class="card" id="apiKeyCard">
-        <details>
-          <summary class="section-title" style="cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:8px">
-            ⚙️ Parts API Configuration
-            <span class="small" style="font-weight:400;color:var(--muted)">(expand to set API key)</span>
-          </summary>
-          <div class="stack" style="margin-top:12px">
-            <label for="apiKeyInput">Anthropic API Key</label>
-            <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" autocomplete="off" spellcheck="false" />
-            <div class="small" style="color:var(--muted);line-height:1.6">
-              Required when running this file locally to generate AI parts data.
-              Get a free key at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.
-              Your key is never stored — it only goes directly to Anthropic's API.
-            </div>
-          </div>
-        </details>
-      </div>
-
+      <div id="results" class="card results">
 
         <div class="vehicle-head">
           <div>
@@ -613,7 +650,7 @@
         </div>
 
         <p class="footer-note">
-          Parts listings are AI-generated estimates based on common fitment data — verify part numbers and pricing before purchasing. Links open Google Shopping for the specific part.
+          Clicking any retailer button opens a vehicle-filtered search for that part at that store — all links include the year, make, and model from your decoded VIN.
         </p>
       </div>
 
@@ -735,173 +772,87 @@
       return `https://www.rockauto.com/en/catalog/${m},${year},${mo}${eng}`;
     }
 
+    /* ─── Part category constants ──────────────────────────────── */
+    const PART_CATS = [
+      { name: 'Oil Filter',            icon: '🔧', term: 'oil filter',              azSlug: 'oil-filter' },
+      { name: 'Air Filter',            icon: '💨', term: 'air filter',              azSlug: 'air-filter' },
+      { name: 'Cabin Air Filter',      icon: '🌬️', term: 'cabin air filter',        azSlug: 'cabin-air-filter' },
+      { name: 'Fuel Filter',           icon: '⛽', term: 'fuel filter',             azSlug: 'fuel-filter' },
+      { name: 'Brake Pads (Front)',    icon: '🛑', term: 'front brake pads',        azSlug: 'disc-brake-pad-set' },
+      { name: 'Brake Rotors (Front)',  icon: '⚙️', term: 'front brake rotors',      azSlug: 'disc-brake-rotor' },
+      { name: 'Spark Plugs',          icon: '⚡', term: 'spark plugs',             azSlug: 'spark-plug' },
+      { name: 'Ignition Coils',       icon: '🔌', term: 'ignition coils',          azSlug: 'ignition-coil' },
+      { name: 'Battery',              icon: '🔋', term: 'car battery',             azSlug: 'battery' },
+      { name: 'Serpentine Belt',      icon: '➰', term: 'serpentine belt',          azSlug: 'serpentine-belt' },
+      { name: 'Water Pump',           icon: '💧', term: 'water pump',              azSlug: 'water-pump' },
+      { name: 'Thermostat',           icon: '🌡️', term: 'engine thermostat',       azSlug: 'thermostat' },
+      { name: 'Alternator',           icon: '⚡', term: 'alternator',              azSlug: 'alternator' },
+      { name: 'Wiper Blades',         icon: '🌧️', term: 'wiper blades',            azSlug: 'conventional-blade' },
+      { name: 'Headlight Bulbs',      icon: '💡', term: 'headlight bulbs',         azSlug: 'headlight-bulb' },
+    ];
+
+    function buildPartLinks(year, make, model, cat) {
+      const q   = encodeURIComponent(`${year} ${make} ${model} ${cat.term}`);
+      const azM = make.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const azO = model.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const yr  = encodeURIComponent(year);
+      const mk  = encodeURIComponent(make);
+      const mo  = encodeURIComponent(model);
+      return {
+        rockauto: buildRockAutoUrl(year, make, model),
+        autozone: `https://www.autozone.com/${cat.azSlug}/${azM}--${azO}/${year}--${azM}-${azO}`,
+        oreilly:  `https://www.oreillyauto.com/shop/b/${cat.azSlug}?year=${yr}&make=${mk}&model=${mo}`,
+        napa:     `https://www.napaonline.com/en/search?q=${q}`,
+        ebay:     `https://www.ebay.com/sch/i.html?_nkw=${q}&_sacat=6030`,
+      };
+    }
+
     async function fetchAndRenderParts(year, make, model, engine) {
       const loading = $('aiPartsLoading');
       const content = $('aiPartsContent');
-      loading.style.display = 'flex';
+      loading.style.display = 'none'; // no loading needed — everything is instant
       content.innerHTML = '';
 
       const vehicleStr = [year, make, model, engine].filter(Boolean).join(' ');
+      const raUrl      = buildRockAutoUrl(year, make, model, engine);
+      const ebayUrl    = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(vehicleStr + ' parts')}&_sacat=6030`;
+      const azUrl      = `https://www.autozone.com/searchresult?searchText=${encodeURIComponent(vehicleStr)}`;
 
-      // ── Show instant direct links right away ──────────────────
-      const raUrl   = buildRockAutoUrl(year, make, model, engine);
-      const ebayUrl = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(vehicleStr + ' parts')}&_sacat=6030`;
-      const amzUrl  = `https://www.amazon.com/s?k=${encodeURIComponent(vehicleStr + ' parts')}&rh=n%3A15690151`;
-
+      // Quick-access header row
       const quickEl = document.createElement('div');
       quickEl.className = 'ra-quick-links';
       quickEl.innerHTML = `
         <a href="${raUrl}"   target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-rockauto">🏪 RockAuto Catalog</a>
         <a href="${ebayUrl}" target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-ebay">🔍 eBay Motors</a>
-        <a href="${amzUrl}"  target="_blank" rel="noopener noreferrer" class="ra-quick-link">📦 Amazon Auto</a>
+        <a href="${azUrl}"   target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-az">🔧 AutoZone</a>
       `;
       content.appendChild(quickEl);
 
-      // ── Call Anthropic API for structured parts list ──────────
-      const apiKeyEl = $('apiKeyInput');
-      const apiKey   = apiKeyEl ? apiKeyEl.value.trim() : '';
+      // Per-category retailer cards
+      const grid = document.createElement('div');
+      grid.className = 'part-cat-grid';
 
-      const headers = {
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      };
-      if (apiKey) headers['x-api-key'] = apiKey;
-
-      try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-6',
-            max_tokens: 1000,
-            messages: [{
-              role: 'user',
-              content: `You are an automotive parts expert. Return ONLY a valid JSON object — no markdown, no explanation — listing replacement parts for a ${vehicleStr}.
-
-Include these 10 categories: Oil Filter, Air Filter, Brake Pads (Front), Brake Rotors (Front), Spark Plugs, Battery, Serpentine Belt, Water Pump, Radiator Hoses, Wiper Blades.
-
-For each category give 2–3 parts from real brands across Economy / Standard / Premium tiers with accurate part numbers for this exact vehicle.
-
-Respond with ONLY this JSON and nothing else:
-{"vehicle":"${vehicleStr}","categories":[{"name":"Oil Filter","icon":"🔧","parts":[{"brand":"FRAM","partNumber":"PH3593A","description":"Extra Guard Spin-On Oil Filter","specs":"1-14 Thread; Nitrile Seal","tier":"Economy","estimatedPrice":"$5.49"}]}]}`
-            }]
-          })
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error('API key missing or invalid. Open the <strong>⚙️ Parts API Configuration</strong> panel above and enter your key. Get one free at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.');
-          }
-          throw new Error(`Anthropic API returned status ${response.status}.`);
-        }
-
-        const data  = await response.json();
-        const raw   = (data.content || []).map(b => b.type === 'text' ? b.text : '').join('');
-        const clean = raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
-        const parsed = JSON.parse(clean);
-        renderAIParts(parsed);
-
-      } catch (err) {
-        const isHtml = err.message.includes('<');
-        const errEl = document.createElement('div');
-        errEl.className = 'parts-api-error';
-        errEl.innerHTML = isHtml
-          ? `⚠️ ${err.message}`
-          : `⚠️ ${escapeHtml(err.message || 'Unknown error')} — Use the direct links above to browse parts on RockAuto or eBay.`;
-        content.appendChild(errEl);
-      } finally {
-        loading.style.display = 'none';
-      }
-    }
-
-    function renderAIParts(data) {
-      const content = $('aiPartsContent');
-      content.innerHTML = '';
-
-      if (!data || !Array.isArray(data.categories) || !data.categories.length) {
-        content.innerHTML = '<p class="status" style="padding:12px">No parts data returned.</p>';
-        return;
-      }
-
-      const note = document.createElement('div');
-      note.className = 'parts-ai-note';
-      note.innerHTML = '⚠️ <strong>AI-generated estimates.</strong> Part numbers, specs, and prices are suggestions — always verify fitment and current pricing before purchasing.';
-      content.appendChild(note);
-
-      const tierColors = {
-        'economy': 'ra-tier-economy',
-        'standard': 'ra-tier-standard',
-        'standard replacement': 'ra-tier-standard',
-        'premium': 'ra-tier-premium',
-        'professional': 'ra-tier-professional'
-      };
-
-      data.categories.forEach((cat) => {
-        const icon = cat.icon || getPartIcon(cat.name);
-        const section = document.createElement('div');
-        section.className = 'ra-category-section';
-
-        const catBar = document.createElement('div');
-        catBar.className = 'ra-cat-bar';
-        catBar.innerHTML = `<span>${icon}</span> ${escapeHtml(cat.name)}`;
-        section.appendChild(catBar);
-
-        // Group by tier
-        const tierMap = {};
-        (cat.parts || []).forEach((p) => {
-          const t = p.tier || 'Standard';
-          if (!tierMap[t]) tierMap[t] = [];
-          tierMap[t].push(p);
-        });
-
-        const tierOrder = ['Economy', 'Standard', 'Standard Replacement', 'Premium', 'Professional'];
-        const allTiers = [...new Set([...tierOrder, ...Object.keys(tierMap)])].filter(t => tierMap[t]);
-
-        allTiers.forEach((tier) => {
-          const parts = tierMap[tier];
-          if (!parts || !parts.length) return;
-
-          const tierBar = document.createElement('div');
-          const cls = tierColors[tier.toLowerCase()] || 'ra-tier-standard';
-          tierBar.className = `ra-tier-bar ${cls}`;
-          tierBar.textContent = tier;
-          section.appendChild(tierBar);
-
-          const tableWrap = document.createElement('div');
-          tableWrap.className = 'ra-parts-table-wrap';
-
-          const table = document.createElement('table');
-          table.className = 'ra-parts-table';
-
-          parts.forEach((part, i) => {
-            const searchQ = encodeURIComponent([part.brand, part.partNumber, cat.name, data.vehicle].filter(Boolean).join(' '));
-            const buyUrl = `https://www.google.com/search?q=${searchQ}&tbm=shop`;
-
-            const tr = document.createElement('tr');
-            tr.className = i % 2 === 0 ? 'ra-row-even' : 'ra-row-odd';
-            tr.innerHTML = `
-              <td class="ra-icon-cell">${icon}</td>
-              <td class="ra-brand-cell">
-                <span class="ra-brand">${escapeHtml(part.brand || '')}</span>
-                <code class="ra-pn">${escapeHtml(part.partNumber || '')}</code>
-              </td>
-              <td class="ra-desc-cell">
-                <strong>${escapeHtml(part.description || '')}</strong>
-                <div class="ra-specs">${escapeHtml(part.specs || '')}</div>
-              </td>
-              <td class="ra-price-cell">${escapeHtml(part.estimatedPrice || '')}</td>
-              <td class="ra-action-cell"><a href="${buyUrl}" target="_blank" rel="noopener noreferrer" class="ra-buy-btn">Find Part</a></td>
-            `;
-            table.appendChild(tr);
-          });
-
-          tableWrap.appendChild(table);
-          section.appendChild(tableWrap);
-        });
-
-        content.appendChild(section);
+      PART_CATS.forEach((cat) => {
+        const links = buildPartLinks(year, make, model, cat);
+        const card  = document.createElement('div');
+        card.className = 'part-cat-card';
+        card.innerHTML = `
+          <div class="part-cat-hdr">
+            <span class="part-cat-icon">${cat.icon}</span>
+            <span class="part-cat-name">${escapeHtml(cat.name)}</span>
+          </div>
+          <div class="part-cat-btns">
+            <a href="${links.rockauto}" target="_blank" rel="noopener noreferrer" class="plink plink-ra">RockAuto</a>
+            <a href="${links.autozone}" target="_blank" rel="noopener noreferrer" class="plink plink-az">AutoZone</a>
+            <a href="${links.oreilly}"  target="_blank" rel="noopener noreferrer" class="plink plink-or">O'Reilly</a>
+            <a href="${links.napa}"     target="_blank" rel="noopener noreferrer" class="plink plink-na">NAPA</a>
+            <a href="${links.ebay}"     target="_blank" rel="noopener noreferrer" class="plink plink-eb">eBay</a>
+          </div>
+        `;
+        grid.appendChild(card);
       });
+
+      content.appendChild(grid);
     }
 
     function renderVehicle(results, vin) {
