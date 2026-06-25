@@ -570,6 +570,61 @@
     }
     .cat-pick-btn:disabled { cursor: default; opacity: 0.7; }
 
+    /* ── Paste fallback area ─────────────────────────────────── */
+    .ra-paste-wrap {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .ra-paste-note {
+      margin: 0 0 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .ra-paste-steps {
+      margin: 0 0 14px;
+      padding-left: 20px;
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: var(--text);
+    }
+    .ra-paste-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    #raCatName {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    #raCatName:focus { outline: none; border-color: var(--primary); }
+    #raPaste {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      resize: vertical;
+      background: white;
+    }
+    #raPaste:focus { outline: none; border-color: var(--primary); }
+    kbd {
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      background: #e2e8f0;
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+    }
+
     /* ── Parts API error ─────────────────────────────────────── */
     .parts-api-error {
       background: #fef2f2;
@@ -848,29 +903,138 @@
       };
     }
 
-    function renderRetailerCards(year, make, model, container) {
-      const grid = document.createElement('div');
-      grid.className = 'part-cat-grid';
-      PART_CATS.forEach((cat) => {
-        const links = buildPartLinks(year, make, model, cat);
-        const card  = document.createElement('div');
-        card.className = 'part-cat-card';
-        card.innerHTML = `
-          <div class="part-cat-hdr">
-            <span class="part-cat-icon">${cat.icon}</span>
-            <span class="part-cat-name">${escapeHtml(cat.name)}</span>
-          </div>
-          <div class="part-cat-btns">
-            <a href="${links.rockauto}" target="_blank" rel="noopener noreferrer" class="plink plink-ra">RockAuto</a>
-            <a href="${links.autozone}" target="_blank" rel="noopener noreferrer" class="plink plink-az">AutoZone</a>
-            <a href="${links.oreilly}"  target="_blank" rel="noopener noreferrer" class="plink plink-or">O'Reilly</a>
-            <a href="${links.napa}"     target="_blank" rel="noopener noreferrer" class="plink plink-na">NAPA</a>
-            <a href="${links.ebay}"     target="_blank" rel="noopener noreferrer" class="plink plink-eb">eBay</a>
-          </div>`;
-        grid.appendChild(card);
-      });
-      container.appendChild(grid);
+    // ─── Paste & parse fallback ────────────────────────────────
+    function renderPasteArea(year, make, model, raUrl, container) {
+      const wrap = document.createElement('div');
+      wrap.className = 'ra-paste-wrap';
+      wrap.innerHTML = `
+        <p class="ra-paste-note">
+          The automatic fetch was blocked by RockAuto. To display parts here:
+        </p>
+        <ol class="ra-paste-steps">
+          <li>Open <a href="${raUrl}" target="_blank" rel="noopener noreferrer">RockAuto for ${escapeHtml(year+' '+make+' '+model)} ↗</a></li>
+          <li>Click a part category (e.g. <strong>Belt Drive</strong>) and expand all sections</li>
+          <li>Select all text on the page <kbd>Ctrl+A</kbd> then copy <kbd>Ctrl+C</kbd></li>
+          <li>Paste below and click <strong>Show Parts</strong></li>
+        </ol>
+        <div class="ra-paste-row">
+          <input id="raCatName" type="text" placeholder="Category name (e.g. Belt Drive)" />
+          <button class="btn" onclick="parsePastedData()">Show Parts</button>
+        </div>
+        <textarea id="raPaste" placeholder="Paste copied RockAuto text here…" rows="7"></textarea>
+        <div id="pasteResult"></div>`;
+      container.appendChild(wrap);
     }
+
+    function parsePastedData() {
+      const raw     = ($('raPaste')?.value || '').trim();
+      const catName = ($('raCatName')?.value || 'Parts').trim();
+      const out     = $('pasteResult');
+      if (!out) return;
+      if (!raw) { out.innerHTML = '<p class="parts-api-error">Paste some text first.</p>'; return; }
+
+      let tiers = parsePartsText(raw);
+      const tot = Object.values(tiers).reduce((s, a) => s + a.length, 0);
+      if (!tot) {
+        out.innerHTML = '<p class="parts-api-error">No parts found in pasted text — make sure you copied the full parts listing from RockAuto.</p>';
+        return;
+      }
+      out.innerHTML = '';
+      renderPartsTable(tiers, catName, out);
+    }
+
+    // ─── Main entry point ──────────────────────────────────────
+    async function fetchAndRenderParts(year, make, model, engine) {
+      const loading  = $('aiPartsLoading');
+      const content  = $('aiPartsContent');
+      const statusEl = loading.querySelector('p');
+      loading.style.display = 'flex';
+      content.innerHTML = '';
+
+      const vehicleStr = [year, make, model, engine].filter(Boolean).join(' ');
+      const raUrl      = buildRockAutoUrl(year, make, model, engine);
+
+      const countEl = document.createElement('p');
+      countEl.className = 'parts-progress';
+      countEl.style.cssText = 'font-size:0.85rem;color:var(--muted);margin:0 0 12px';
+      content.appendChild(countEl);
+
+      try {
+        if (statusEl) statusEl.textContent = 'Connecting to RockAuto…';
+
+        const html = await proxyFetch(raUrl);
+        if (!html || html.length < 400) throw new Error('Proxy blocked or empty');
+
+        // Does this page already contain tier data? (single-engine vehicles)
+        if (TIERS.some(t => html.includes(t))) {
+          let tiers = parsePartsHtml(html);
+          if (!Object.values(tiers).reduce((s, a) => s + a.length, 0))
+            tiers = parsePartsText(html);
+          const tot = Object.values(tiers).reduce((s, a) => s + a.length, 0);
+          if (tot) {
+            content.removeChild(countEl);
+            renderPartsTable(tiers, `${year} ${make} ${model} Parts`, content);
+            loading.style.display = 'none';
+            return;
+          }
+        }
+
+        // Extract all real category links (with carmenunode)
+        const cats = extractCategoryLinks(html);
+        if (!cats.length) throw new Error('No categories found on catalog page');
+
+        if (statusEl) statusEl.textContent = `Loading all ${cats.length} categories…`;
+        countEl.textContent = `Found ${cats.length} categories — fetching all parts…`;
+
+        let loaded = 0, failed = 0;
+
+        // Fetch all categories in parallel batches of 3
+        const BATCH = 3;
+        for (let i = 0; i < cats.length; i += BATCH) {
+          const batch = cats.slice(i, i + BATCH);
+          await Promise.all(batch.map(async ({ name, url }) => {
+            try {
+              const catHtml = await proxyFetch(url, 10000);
+              if (!catHtml) { failed++; return; }
+
+              let tiers = parsePartsHtml(catHtml);
+              if (!Object.values(tiers).reduce((s, a) => s + a.length, 0))
+                tiers = parsePartsText(catHtml);
+              const tot = Object.values(tiers).reduce((s, a) => s + a.length, 0);
+
+              if (tot) {
+                renderPartsTable(tiers, name, content);
+                loaded++;
+              } else {
+                failed++;
+              }
+            } catch { failed++; }
+          }));
+
+          countEl.textContent = `Loaded ${loaded} of ${cats.length} categories…`;
+          if (i + BATCH < cats.length) await new Promise(r => setTimeout(r, 200));
+        }
+
+        content.removeChild(countEl);
+
+        if (!loaded) throw new Error('All category fetches failed');
+
+        if (failed) {
+          const note = document.createElement('p');
+          note.style.cssText = 'font-size:0.82rem;color:var(--muted);margin:8px 0 0';
+          note.textContent = `${failed} categories could not be fetched (RockAuto rate-limited the proxy).`;
+          content.appendChild(note);
+        }
+
+      } catch {
+        content.innerHTML = '';
+        renderPasteArea(year, make, model, raUrl, content);
+      }
+
+      loading.style.display = 'none';
+    }
+
+
 
     // ─── Parse RockAuto catalog HTML for category links ─────────
     function extractCategoryLinks(html) {
@@ -1051,129 +1215,6 @@
       container.appendChild(wrap);
       return total;
     }
-
-    // ─── Load one category's parts inline ─────────────────────
-    async function loadCategory(name, url, btn, displayEl) {
-      btn.disabled = true;
-      btn.textContent = '⏳ Loading…';
-
-      try {
-        const html = await proxyFetch(url);
-        if (!html) throw new Error('Proxy blocked');
-
-        let tiers = parsePartsHtml(html);
-        const total = Object.values(tiers).reduce((s, a) => s + a.length, 0);
-        if (!total) {
-          tiers = parsePartsText(html);
-          const t2 = Object.values(tiers).reduce((s, a) => s + a.length, 0);
-          if (!t2) throw new Error('No parts found in response');
-        }
-
-        // Clear previous and render new
-        displayEl.innerHTML = '';
-        renderPartsTable(tiers, name, displayEl);
-        btn.textContent = `✅ ${name}`;
-        btn.style.cssText = 'background:#15803d;color:#fff;cursor:default';
-      } catch (err) {
-        btn.disabled = false;
-        btn.textContent = `↗ ${name}`;
-        btn.title = 'Click to open directly on RockAuto';
-        btn.onclick = () => window.open(url, '_blank');
-
-        displayEl.innerHTML = '';
-        const errEl = document.createElement('div');
-        errEl.className = 'parts-api-error';
-        errEl.innerHTML = `RockAuto blocked the inline fetch. <a href="${url}" target="_blank" rel="noopener noreferrer">Open ${escapeHtml(name)} on RockAuto →</a>`;
-        displayEl.appendChild(errEl);
-      }
-    }
-
-    // ─── Main entry point ──────────────────────────────────────
-    async function fetchAndRenderParts(year, make, model, engine) {
-      const loading = $('aiPartsLoading');
-      const content = $('aiPartsContent');
-      loading.style.display = 'flex';
-      content.innerHTML = '';
-
-      const vehicleStr = [year, make, model, engine].filter(Boolean).join(' ');
-      const raUrl   = buildRockAutoUrl(year, make, model, engine);
-      const ebayUrl = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(vehicleStr+' parts')}&_sacat=6030`;
-      const azUrl   = `https://www.autozone.com/searchresult?searchText=${encodeURIComponent(vehicleStr)}`;
-
-      // Always show quick-access bar immediately
-      const quickEl = document.createElement('div');
-      quickEl.className = 'ra-quick-links';
-      quickEl.innerHTML = `
-        <a href="${raUrl}"   target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-rockauto">🏪 RockAuto Catalog</a>
-        <a href="${ebayUrl}" target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-ebay">🔍 eBay Motors</a>
-        <a href="${azUrl}"   target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-az">🔧 AutoZone</a>`;
-      content.appendChild(quickEl);
-
-      const statusEl = loading.querySelector('p');
-      if (statusEl) statusEl.textContent = 'Connecting to RockAuto…';
-
-      try {
-        const html = await proxyFetch(raUrl);
-
-        if (html && html.length > 500) {
-          // Does this page already have tier/part content? (e.g. single-engine vehicle)
-          const hasTiers = TIERS.some(t => html.includes(t));
-          if (hasTiers) {
-            let tiers = parsePartsHtml(html);
-            const tot = Object.values(tiers).reduce((s, a) => s + a.length, 0);
-            if (!tot) tiers = parsePartsText(html);
-            const tot2 = Object.values(tiers).reduce((s, a) => s + a.length, 0);
-            if (tot2) {
-              renderPartsTable(tiers, `${year} ${make} ${model} Parts`, content);
-              loading.style.display = 'none';
-              return;
-            }
-          }
-
-          // Extract real category links (with carmenunode) from catalog page
-          const cats = extractCategoryLinks(html);
-          if (cats.length > 0) {
-            const displayEl = document.createElement('div');
-            displayEl.id = 'partsDisplayArea';
-
-            const catWrap = document.createElement('div');
-            catWrap.style.marginBottom = '12px';
-
-            const catLabel = document.createElement('p');
-            catLabel.style.cssText = 'font-weight:700;margin:0 0 8px;font-size:0.9rem;color:var(--muted)';
-            catLabel.textContent = `${cats.length} categories found — click one to load parts:`;
-            catWrap.appendChild(catLabel);
-
-            const catGrid = document.createElement('div');
-            catGrid.className = 'cat-btn-grid';
-
-            cats.forEach(({ name, url }) => {
-              const btn = document.createElement('button');
-              btn.className = 'cat-pick-btn';
-              btn.textContent = name;
-              btn.onclick = () => {
-                catGrid.querySelectorAll('.cat-pick-btn').forEach(b => {
-                  if (b !== btn) { b.style.cssText = ''; b.disabled = false; }
-                });
-                loadCategory(name, url, btn, displayEl);
-              };
-              catGrid.appendChild(btn);
-            });
-
-            catWrap.appendChild(catGrid);
-            content.appendChild(catWrap);
-            content.appendChild(displayEl);
-            loading.style.display = 'none';
-            return;
-          }
-        }
-      } catch {}
-
-      // Fallback: retailer cards
-      renderRetailerCards(year, make, model, content);
-      loading.style.display = 'none';
-    }
-
 
     function renderVehicle(results, vin) {
       const year = getDecodedValue(results, 'Model Year');
