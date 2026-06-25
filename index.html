@@ -763,75 +763,67 @@
       return '🔩';
     }
 
-    function buildRockAutoUrl(year, make, model, engine) {
-      const m  = (make   || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const mo = (model  || '').toLowerCase().replace(/\s+/g, '+').replace(/[^a-z0-9+]/g, '');
-      const eng = engine
-        ? ',' + (engine).toLowerCase().replace(/\s+/g, '+').replace(/[^a-z0-9+.]/g, '')
-        : '';
-      return `https://www.rockauto.com/en/catalog/${m},${year},${mo}${eng}`;
+    // ─── CORS proxy fetch ──────────────────────────────────────
+    const RA = 'https://www.rockauto.com';
+    const PROXIES = [
+      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+      u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    ];
+
+    async function proxyFetch(url, ms = 14000) {
+      for (const px of PROXIES) {
+        try {
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), ms);
+          const res = await fetch(px(url), { signal: ctrl.signal });
+          clearTimeout(timer);
+          if (res.ok) { const t = await res.text(); if (t && t.length > 400) return t; }
+        } catch {}
+      }
+      return null;
     }
 
-    /* ─── Part category constants ──────────────────────────────── */
+    // ─── URL builder (preserve hyphens: E-350, F-150, C-Max) ───
+    function buildRockAutoUrl(year, make, model, engine) {
+      const m  = (make  || '').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+      const mo = (model || '').toLowerCase().replace(/\s+/g, '+').replace(/[^a-z0-9+\-]/g, '');
+      const e  = engine ? ',' + (engine).toLowerCase().replace(/\s+/g, '+').replace(/[^a-z0-9+.]/g, '') : '';
+      return `${RA}/en/catalog/${m},${year},${mo}${e}`;
+    }
+
+    // ─── Fallback category cards ───────────────────────────────
     const PART_CATS = [
-      { name: 'Oil Filter',            icon: '🔧', term: 'oil filter',              azSlug: 'oil-filter' },
-      { name: 'Air Filter',            icon: '💨', term: 'air filter',              azSlug: 'air-filter' },
-      { name: 'Cabin Air Filter',      icon: '🌬️', term: 'cabin air filter',        azSlug: 'cabin-air-filter' },
-      { name: 'Fuel Filter',           icon: '⛽', term: 'fuel filter',             azSlug: 'fuel-filter' },
-      { name: 'Brake Pads (Front)',    icon: '🛑', term: 'front brake pads',        azSlug: 'disc-brake-pad-set' },
-      { name: 'Brake Rotors (Front)',  icon: '⚙️', term: 'front brake rotors',      azSlug: 'disc-brake-rotor' },
-      { name: 'Spark Plugs',          icon: '⚡', term: 'spark plugs',             azSlug: 'spark-plug' },
-      { name: 'Ignition Coils',       icon: '🔌', term: 'ignition coils',          azSlug: 'ignition-coil' },
-      { name: 'Battery',              icon: '🔋', term: 'car battery',             azSlug: 'battery' },
-      { name: 'Serpentine Belt',      icon: '➰', term: 'serpentine belt',          azSlug: 'serpentine-belt' },
-      { name: 'Water Pump',           icon: '💧', term: 'water pump',              azSlug: 'water-pump' },
-      { name: 'Thermostat',           icon: '🌡️', term: 'engine thermostat',       azSlug: 'thermostat' },
-      { name: 'Alternator',           icon: '⚡', term: 'alternator',              azSlug: 'alternator' },
-      { name: 'Wiper Blades',         icon: '🌧️', term: 'wiper blades',            azSlug: 'conventional-blade' },
-      { name: 'Headlight Bulbs',      icon: '💡', term: 'headlight bulbs',         azSlug: 'headlight-bulb' },
+      { name: 'Belt Drive',           icon: '➰', term: 'belt serpentine belt tensioner' },
+      { name: 'Oil Filter',           icon: '🔧', term: 'oil filter' },
+      { name: 'Air Filter',           icon: '💨', term: 'air filter' },
+      { name: 'Cabin Air Filter',     icon: '🌬️', term: 'cabin air filter' },
+      { name: 'Fuel Filter',          icon: '⛽', term: 'fuel filter' },
+      { name: 'Brake Pads (Front)',   icon: '🛑', term: 'front brake pads' },
+      { name: 'Brake Rotors (Front)', icon: '⚙️', term: 'front brake rotors' },
+      { name: 'Spark Plugs',          icon: '⚡', term: 'spark plugs' },
+      { name: 'Battery',              icon: '🔋', term: 'car battery' },
+      { name: 'Water Pump',           icon: '💧', term: 'water pump' },
+      { name: 'Alternator',           icon: '⚡', term: 'alternator' },
+      { name: 'Wiper Blades',         icon: '🌧️', term: 'wiper blades' },
+      { name: 'Headlight Bulbs',      icon: '💡', term: 'headlight bulbs' },
+      { name: 'Ignition Coils',       icon: '🔌', term: 'ignition coils' },
     ];
 
     function buildPartLinks(year, make, model, cat) {
-      const q   = encodeURIComponent(`${year} ${make} ${model} ${cat.term}`);
-      const azM = make.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const azO = model.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const yr  = encodeURIComponent(year);
-      const mk  = encodeURIComponent(make);
-      const mo  = encodeURIComponent(model);
+      const q  = encodeURIComponent(`${year} ${make} ${model} ${cat.term}`);
+      const yr = encodeURIComponent(year), mk = encodeURIComponent(make), mo = encodeURIComponent(model);
       return {
         rockauto: buildRockAutoUrl(year, make, model),
-        autozone: `https://www.autozone.com/${cat.azSlug}/${azM}--${azO}/${year}--${azM}-${azO}`,
-        oreilly:  `https://www.oreillyauto.com/shop/b/${cat.azSlug}?year=${yr}&make=${mk}&model=${mo}`,
+        autozone: `https://www.autozone.com/searchresult?searchText=${encodeURIComponent(year+' '+make+' '+model+' '+cat.term)}`,
+        oreilly:  `https://www.oreillyauto.com/shop/b?year=${yr}&make=${mk}&model=${mo}&q=${encodeURIComponent(cat.term)}`,
         napa:     `https://www.napaonline.com/en/search?q=${q}`,
         ebay:     `https://www.ebay.com/sch/i.html?_nkw=${q}&_sacat=6030`,
       };
     }
 
-    async function fetchAndRenderParts(year, make, model, engine) {
-      const loading = $('aiPartsLoading');
-      const content = $('aiPartsContent');
-      loading.style.display = 'none'; // no loading needed — everything is instant
-      content.innerHTML = '';
-
-      const vehicleStr = [year, make, model, engine].filter(Boolean).join(' ');
-      const raUrl      = buildRockAutoUrl(year, make, model, engine);
-      const ebayUrl    = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(vehicleStr + ' parts')}&_sacat=6030`;
-      const azUrl      = `https://www.autozone.com/searchresult?searchText=${encodeURIComponent(vehicleStr)}`;
-
-      // Quick-access header row
-      const quickEl = document.createElement('div');
-      quickEl.className = 'ra-quick-links';
-      quickEl.innerHTML = `
-        <a href="${raUrl}"   target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-rockauto">🏪 RockAuto Catalog</a>
-        <a href="${ebayUrl}" target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-ebay">🔍 eBay Motors</a>
-        <a href="${azUrl}"   target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-az">🔧 AutoZone</a>
-      `;
-      content.appendChild(quickEl);
-
-      // Per-category retailer cards
+    function renderRetailerCards(year, make, model, container) {
       const grid = document.createElement('div');
       grid.className = 'part-cat-grid';
-
       PART_CATS.forEach((cat) => {
         const links = buildPartLinks(year, make, model, cat);
         const card  = document.createElement('div');
@@ -847,13 +839,314 @@
             <a href="${links.oreilly}"  target="_blank" rel="noopener noreferrer" class="plink plink-or">O'Reilly</a>
             <a href="${links.napa}"     target="_blank" rel="noopener noreferrer" class="plink plink-na">NAPA</a>
             <a href="${links.ebay}"     target="_blank" rel="noopener noreferrer" class="plink plink-eb">eBay</a>
-          </div>
-        `;
+          </div>`;
         grid.appendChild(card);
       });
-
-      content.appendChild(grid);
+      container.appendChild(grid);
     }
+
+    // ─── Parse RockAuto catalog HTML for category links ─────────
+    function extractCategoryLinks(html) {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const seen = new Set();
+      const cats = [];
+      // Category links contain a numeric carmenunode in the path
+      doc.querySelectorAll('a[href]').forEach(a => {
+        const href = a.getAttribute('href') || '';
+        const text = a.textContent.trim();
+        if (
+          /\/en\/catalog\/[^"]+,\d{5,}/.test(href) &&
+          text && text.length > 1 && text.length < 60 &&
+          !seen.has(text) && !text.match(/RockAuto|^Select|^\d/)
+        ) {
+          seen.add(text);
+          cats.push({ name: text, url: href.startsWith('http') ? href : RA + href });
+        }
+      });
+      return cats;
+    }
+
+    // ─── Parse parts from a category-page HTML or its text ─────
+    const TIERS = ['Standard Replacement', 'Economy', 'Heavy Duty', 'Premium', 'Kit', 'Professional'];
+
+    function parsePartsHtml(html) {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const tiers = {};
+      let tier = 'Standard Replacement';
+
+      // Walk every element to track tier headers and listing rows together
+      const allEls = doc.querySelectorAll('*');
+      allEls.forEach(el => {
+        const cls  = (el.className || '').toString();
+        const text = (el.textContent || '').trim();
+
+        // Tier header detection
+        if (cls.includes('listing-type') || cls.includes('tier') || cls.includes('group-header')) {
+          const match = TIERS.find(t => text.startsWith(t));
+          if (match) { tier = match; return; }
+        }
+
+        // Part row detection
+        const isTr = el.tagName === 'TR';
+        const isListingRow = isTr && (cls.includes('listing') || (el.id || '').includes('listing'));
+        const isGenericRow = isTr && !isListingRow &&
+          /\$[\d.]+/.test(text) && el.querySelectorAll('td').length >= 3;
+
+        if (!isListingRow && !isGenericRow) return;
+
+        const cells = [...el.querySelectorAll('td')];
+        let brand = '', partNumber = '', description = '', price = '';
+
+        cells.forEach(td => {
+          const c = (td.className || '').toString();
+          const v = td.textContent.trim();
+          if (c.includes('label') || c.includes('brand'))  brand       = v;
+          else if (c.includes('info-code') || c.includes('partnum')) partNumber = v.split(/\s/)[0];
+          else if (c.includes('note')  || c.includes('descript'))    description = v;
+          else if (c.includes('price') || /^\$[\d.]+$/.test(v))      price = (v.match(/\$[\d.]+/) || [''])[0];
+        });
+
+        // Generic fallback — scan cells for all-caps brand then alphanum part#
+        if (!brand && cells.length >= 2) {
+          cells.forEach(td => {
+            const v = td.textContent.trim();
+            if (!brand && /^[A-Z][A-Z &\-]{1,20}$/.test(v)) { brand = v; return; }
+            if (brand && !partNumber && /^[A-Z0-9]{3,15}$/.test(v)) { partNumber = v; return; }
+            if (!price) { const pm = v.match(/\$[\d.]+/); if (pm) price = pm[0]; }
+          });
+        }
+
+        if (!brand && !partNumber) return;
+        if (!tiers[tier]) tiers[tier] = [];
+        tiers[tier].push({ brand, partNumber, description, price });
+      });
+
+      return tiers;
+    }
+
+    // Text-based extraction when HTML parsing yields nothing
+    function parsePartsText(rawText) {
+      const tiers = {};
+      let tier = 'Standard Replacement';
+      const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const tm = TIERS.find(t => line === t || line === t + ' collapse');
+        if (tm) { tier = tm; continue; }
+
+        // BRAND PARTNUM rest…
+        const m = line.match(/^([A-Z][A-Z &\-]{1,22}?)\s{2,}([A-Z0-9]{3,15})\s+(.*)$/);
+        if (!m) {
+          // also try single-space split if the part# is clearly identifiable
+          const m2 = line.match(/^([A-Z]{2,}(?:\s[A-Z]+)?)\s+([A-Z0-9]{4,15})\s*(.*)?$/);
+          if (!m2) continue;
+          const [, b, pn, rest = ''] = m2;
+          let price = '', desc = rest.replace(/\bInfo\b.*$/, '').trim();
+          for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+            const pm = lines[j].match(/^\$([\d.]+)/);
+            if (pm) { price = '$' + pm[1]; break; }
+            if (lines[j] && !lines[j].match(/^(Add to Cart|Part image|Choose|\d+|<|>|One of)/i) && !desc)
+              desc = lines[j];
+          }
+          if (!tiers[tier]) tiers[tier] = [];
+          tiers[tier].push({ brand: b.trim(), partNumber: pn.trim(), description: desc, price });
+          continue;
+        }
+        const [, b, pn, rest] = m;
+        let price = '', desc = rest.replace(/\bInfo\b.*$/, '').trim();
+        for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+          const pm = lines[j].match(/^\$([\d.]+)/);
+          if (pm) { price = '$' + pm[1]; break; }
+          if (lines[j] && !lines[j].match(/^(Add to Cart|Part image|Choose|\d+|<|>|One of)/i) && !desc)
+            desc = lines[j];
+        }
+        if (!tiers[tier]) tiers[tier] = [];
+        tiers[tier].push({ brand: b.trim(), partNumber: pn.trim(), description: desc, price });
+      }
+      return tiers;
+    }
+
+    // ─── Render a parts table for one category ─────────────────
+    const TIER_COLORS = {
+      'Standard Replacement': '#1d4ed8',
+      'Economy':              '#b45309',
+      'Heavy Duty':           '#065f46',
+      'Premium':              '#6d28d9',
+      'Kit':                  '#be185d',
+      'Professional':         '#0e7490',
+    };
+
+    function renderPartsTable(tiers, categoryName, container) {
+      const total = Object.values(tiers).reduce((s, a) => s + a.length, 0);
+      if (!total) return 0;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'ra-category-section';
+
+      const hdr = document.createElement('div');
+      hdr.className = 'ra-cat-bar';
+      hdr.innerHTML = `<span>📦</span> ${escapeHtml(categoryName)} <span class="catalog-count">${total} parts</span>`;
+      wrap.appendChild(hdr);
+
+      Object.entries(tiers).forEach(([tier, parts]) => {
+        if (!parts.length) return;
+        const tb = document.createElement('div');
+        tb.className = 'ra-tier-bar';
+        tb.style.background = TIER_COLORS[tier] || '#334155';
+        tb.textContent = tier;
+        wrap.appendChild(tb);
+
+        const tw = document.createElement('div'); tw.className = 'ra-parts-table-wrap';
+        const tbl = document.createElement('table'); tbl.className = 'ra-parts-table';
+        const th = document.createElement('thead');
+        th.innerHTML = '<tr><th>Brand</th><th>Part #</th><th>Description</th><th>Price</th><th></th></tr>';
+        tbl.appendChild(th);
+        const tbody = document.createElement('tbody');
+
+        parts.forEach((p, i) => {
+          const tr = document.createElement('tr');
+          tr.className = i % 2 === 0 ? 'ra-row-even' : 'ra-row-odd';
+          const gQ = encodeURIComponent(`${p.brand} ${p.partNumber} auto part`);
+          tr.innerHTML = `
+            <td class="ra-brand-cell"><span class="ra-brand">${escapeHtml(p.brand||'')}</span></td>
+            <td><code class="ra-pn">${escapeHtml(p.partNumber||'')}</code></td>
+            <td class="ra-desc-cell"><span>${escapeHtml(p.description||'')}</span></td>
+            <td class="ra-price-cell">${escapeHtml(p.price||'')}</td>
+            <td class="ra-action-cell">
+              <a href="https://www.google.com/search?q=${gQ}&tbm=shop" target="_blank" rel="noopener noreferrer" class="ra-buy-btn">Shop</a>
+            </td>`;
+          tbody.appendChild(tr);
+        });
+        tbl.appendChild(tbody); tw.appendChild(tbl); wrap.appendChild(tw);
+      });
+
+      container.appendChild(wrap);
+      return total;
+    }
+
+    // ─── Load one category's parts inline ─────────────────────
+    async function loadCategory(name, url, btn, displayEl) {
+      btn.disabled = true;
+      btn.textContent = '⏳ Loading…';
+
+      try {
+        const html = await proxyFetch(url);
+        if (!html) throw new Error('Proxy blocked');
+
+        let tiers = parsePartsHtml(html);
+        const total = Object.values(tiers).reduce((s, a) => s + a.length, 0);
+        if (!total) {
+          tiers = parsePartsText(html);
+          const t2 = Object.values(tiers).reduce((s, a) => s + a.length, 0);
+          if (!t2) throw new Error('No parts found in response');
+        }
+
+        // Clear previous and render new
+        displayEl.innerHTML = '';
+        renderPartsTable(tiers, name, displayEl);
+        btn.textContent = `✅ ${name}`;
+        btn.style.cssText = 'background:#15803d;color:#fff;cursor:default';
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = `↗ ${name}`;
+        btn.title = 'Click to open directly on RockAuto';
+        btn.onclick = () => window.open(url, '_blank');
+
+        displayEl.innerHTML = '';
+        const errEl = document.createElement('div');
+        errEl.className = 'parts-api-error';
+        errEl.innerHTML = `RockAuto blocked the inline fetch. <a href="${url}" target="_blank" rel="noopener noreferrer">Open ${escapeHtml(name)} on RockAuto →</a>`;
+        displayEl.appendChild(errEl);
+      }
+    }
+
+    // ─── Main entry point ──────────────────────────────────────
+    async function fetchAndRenderParts(year, make, model, engine) {
+      const loading = $('aiPartsLoading');
+      const content = $('aiPartsContent');
+      loading.style.display = 'flex';
+      content.innerHTML = '';
+
+      const vehicleStr = [year, make, model, engine].filter(Boolean).join(' ');
+      const raUrl   = buildRockAutoUrl(year, make, model, engine);
+      const ebayUrl = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(vehicleStr+' parts')}&_sacat=6030`;
+      const azUrl   = `https://www.autozone.com/searchresult?searchText=${encodeURIComponent(vehicleStr)}`;
+
+      // Always show quick-access bar immediately
+      const quickEl = document.createElement('div');
+      quickEl.className = 'ra-quick-links';
+      quickEl.innerHTML = `
+        <a href="${raUrl}"   target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-rockauto">🏪 RockAuto Catalog</a>
+        <a href="${ebayUrl}" target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-ebay">🔍 eBay Motors</a>
+        <a href="${azUrl}"   target="_blank" rel="noopener noreferrer" class="ra-quick-link ra-quick-az">🔧 AutoZone</a>`;
+      content.appendChild(quickEl);
+
+      const statusEl = loading.querySelector('p');
+      if (statusEl) statusEl.textContent = 'Connecting to RockAuto…';
+
+      try {
+        const html = await proxyFetch(raUrl);
+
+        if (html && html.length > 500) {
+          // Does this page already have tier/part content? (e.g. single-engine vehicle)
+          const hasTiers = TIERS.some(t => html.includes(t));
+          if (hasTiers) {
+            let tiers = parsePartsHtml(html);
+            const tot = Object.values(tiers).reduce((s, a) => s + a.length, 0);
+            if (!tot) tiers = parsePartsText(html);
+            const tot2 = Object.values(tiers).reduce((s, a) => s + a.length, 0);
+            if (tot2) {
+              renderPartsTable(tiers, `${year} ${make} ${model} Parts`, content);
+              loading.style.display = 'none';
+              return;
+            }
+          }
+
+          // Extract real category links (with carmenunode) from catalog page
+          const cats = extractCategoryLinks(html);
+          if (cats.length > 0) {
+            const displayEl = document.createElement('div');
+            displayEl.id = 'partsDisplayArea';
+
+            const catWrap = document.createElement('div');
+            catWrap.style.marginBottom = '12px';
+
+            const catLabel = document.createElement('p');
+            catLabel.style.cssText = 'font-weight:700;margin:0 0 8px;font-size:0.9rem;color:var(--muted)';
+            catLabel.textContent = `${cats.length} categories found — click one to load parts:`;
+            catWrap.appendChild(catLabel);
+
+            const catGrid = document.createElement('div');
+            catGrid.className = 'cat-btn-grid';
+
+            cats.forEach(({ name, url }) => {
+              const btn = document.createElement('button');
+              btn.className = 'cat-pick-btn';
+              btn.textContent = name;
+              btn.onclick = () => {
+                catGrid.querySelectorAll('.cat-pick-btn').forEach(b => {
+                  if (b !== btn) { b.style.cssText = ''; b.disabled = false; }
+                });
+                loadCategory(name, url, btn, displayEl);
+              };
+              catGrid.appendChild(btn);
+            });
+
+            catWrap.appendChild(catGrid);
+            content.appendChild(catWrap);
+            content.appendChild(displayEl);
+            loading.style.display = 'none';
+            return;
+          }
+        }
+      } catch {}
+
+      // Fallback: retailer cards
+      renderRetailerCards(year, make, model, content);
+      loading.style.display = 'none';
+    }
+
 
     function renderVehicle(results, vin) {
       const year = getDecodedValue(results, 'Model Year');
