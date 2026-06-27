@@ -570,59 +570,15 @@
     }
     .cat-pick-btn:disabled { cursor: default; opacity: 0.7; }
 
-    /* ── Paste fallback area ─────────────────────────────────── */
-    .ra-paste-wrap {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 20px;
-    }
-    .ra-paste-note {
-      margin: 0 0 6px;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    .ra-paste-steps {
-      margin: 0 0 14px;
-      padding-left: 20px;
-      font-size: 0.88rem;
-      line-height: 1.75;
-      color: var(--text);
-    }
-    .ra-paste-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    #raCatName {
-      flex: 1;
-      min-width: 0;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
+    /* ── Platform badge ──────────────────────────────────────── */
+    .parts-platform-badge {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0 0 12px;
+      padding: 6px 10px;
+      background: #f1f5f9;
       border-radius: 8px;
-      font-size: 0.9rem;
-      font-family: inherit;
-    }
-    #raCatName:focus { outline: none; border-color: var(--primary); }
-    #raPaste {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px 12px;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-family: inherit;
-      resize: vertical;
-      background: white;
-    }
-    #raPaste:focus { outline: none; border-color: var(--primary); }
-    kbd {
-      font-family: ui-monospace, monospace;
-      font-size: 0.8rem;
-      background: #e2e8f0;
-      padding: 1px 5px;
-      border-radius: 4px;
-      border: 1px solid #cbd5e1;
     }
 
     /* ── Parts API error ─────────────────────────────────────── */
@@ -845,320 +801,737 @@
       return '🔩';
     }
 
-    // ─── CORS proxy fetch ──────────────────────────────────────
-    const RA = 'https://www.rockauto.com';
-    const PROXIES = [
-      u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-      u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-    ];
+    // ─── RockAuto link builder ─────────────────────────────────
+    function buildRockAutoUrl(year, make, model) {
+      const m  = (make  || '').toLowerCase().replace(/\s+/g,'').replace(/[^a-z0-9]/g,'');
+      const mo = (model || '').toLowerCase().replace(/\s+/g,'+').replace(/[^a-z0-9+\-]/g,'');
+      return `https://www.rockauto.com/en/catalog/${m},${year},${mo}`;
+    }
 
-    async function proxyFetch(url, ms = 14000) {
-      for (const px of PROXIES) {
-        try {
-          const ctrl = new AbortController();
-          const timer = setTimeout(() => ctrl.abort(), ms);
-          const res = await fetch(px(url), { signal: ctrl.signal });
-          clearTimeout(timer);
-          if (res.ok) { const t = await res.text(); if (t && t.length > 400) return t; }
-        } catch {}
+    // ─── Embedded parts database ───────────────────────────────
+    // p(brand, partNumber, description, price) → compact part entry
+    const _p = (b,n,d,pr) => ({brand:b, partNumber:n, description:d, price:pr});
+
+    const VP = {
+
+      platforms: [
+
+        /* ── 1. Ford 6.0L Power Stroke Diesel 2003-2010 ─────── */
+        { id:'ford_ps60', label:'Ford 6.0L Power Stroke Diesel',
+          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && fu.includes('Diesel') && di.startsWith('6.0'),
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[
+                  _p('SKP','SK5060658','Serpentine Belt; 6-Rib; Accessory Drive','$14.99'),
+                ],
+                'Standard Replacement':[
+                  _p('GATES','K060658','Micro-V; w/ Dual Alternators; 6-Rib','$16.82'),
+                  _p('DAYCO','5060658','Serpentine; Alternator / Secondary Alt','$22.79'),
+                  _p('ACDELCO','6K658','Professional; w/ Dual Alternators; 6-Rib','$23.79'),
+                  _p('CONTINENTAL','4080658','Multi V-Belt; Serpentine; 6-Rib','$18.99'),
+                ],
+                'Heavy Duty':[
+                  _p('GATES','K060658HD','FleetRunner HD; w/ Dual Alternators; 6-Rib','$26.79'),
+                  _p('ACDELCO','K060658HD','Professional HD; 6-Rib; Dual Alt','$25.79'),
+                ]
+              },
+              'Belt Tensioner':{
+                Economy:[
+                  _p('SKP','SK89313','Fits w/ Single Alternator or Main Drive','$45.79'),
+                  _p('DORMAN','419001','Main Drive Belt Tensioner','$79.79'),
+                ],
+                'Standard Replacement':[
+                  _p('DAYCO','89313','Accessory Drive; Single Alternator','$64.79'),
+                  _p('LITENS','999075A','Belt Tensioner; w/ Single Alternator','$64.99'),
+                  _p('GATES','38321','DriveAlign; Alt; w/ Dual Alternators','$87.79'),
+                  _p('MOTORCRAFT','BT70','Drive Belt Tensioner; w/ Single Alternator','$87.79'),
+                ]
+              },
+              'Idler Pulley':{
+                Economy:[
+                  _p('FOUR SEASONS','45999','Smooth; w/ Dual Alternator','$10.03'),
+                  _p('HAYDEN','5999','Smooth; w/ Dual Alternator','$11.27'),
+                  _p('SKP','SK36324','Grooved; Accessory Drive','$19.95'),
+                  _p('DORMAN','419706','Smooth; Fits Left; w/ Dual Alternators','$28.79'),
+                ],
+                'Standard Replacement':[
+                  _p('GATES','36492','Smooth Idler Pulley; Accessory Drive','$29.79'),
+                  _p('DAYCO','89157','Smooth; Acc Drive / Dual Alt','$30.89'),
+                  _p('MOTORCRAFT','YS292','Smooth; Dual Heavy Duty Alternator','$27.79'),
+                  _p('CONTINENTAL','50036','Smooth; Incl Hardware; Fits Single Alt or Right Dual Alt','$23.79'),
+                ]
+              },
+              'Tensioner Pulley':{
+                Economy:[
+                  _p('SKP','SK89016','Smooth; 76.5mm x 37mm','$5.59'),
+                  _p('DORMAN','419610','Grooved/Smooth; Alt; w/ Dual Alternators','$19.10'),
+                ],
+                'Standard Replacement':[
+                  _p('FOUR SEASONS','45979','Grooved; Dual Alt Secondary Drive','$9.13'),
+                  _p('HAYDEN','5979','Smooth; Dual Alt Secondary Drive','$9.92'),
+                  _p('DAYCO','89016','Smooth; Water Pump; w/ Dual Alt','$17.35'),
+                  _p('MOTORCRAFT','YS314','Grooved; OE 3C3E-19A216-EB','$45.79'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH9579','Extra Guard Spin-On Oil Filter','$5.49')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FL-2016','OEM Oil Filter','$8.99'),
+                _p('WIX','57502XP','XP Spin-On Oil Filter','$9.49'),
+                _p('PUROLATOR','PL10158','PureONE Oil Filter','$8.99'),
+              ],
+              Premium:[
+                _p('MOBIL 1','M1-108A','Extended Performance Oil Filter','$12.99'),
+                _p('K&N','HP-7018','High Performance Gold Oil Filter','$13.99'),
+              ]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA7426','Extra Guard Air Filter','$14.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FA-1785','OEM Air Filter','$24.99'),
+                _p('WIX','42274','Air Filter','$18.99'),
+              ],
+              Premium:[_p('K&N','33-2296','High-Flow Washable/Reusable Air Filter','$59.99')]
+            },
+            'Fuel Filter':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FD-4615','Fuel Filter; Diesel; Spin-On','$24.99'),
+                _p('WIX','33481','Fuel Filter; Diesel','$19.99'),
+                _p('FLEETGUARD','FF5421','Fuel Filter; 6.0L Power Stroke','$22.99'),
+              ]
+            },
+            'Glow Plugs':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','ZD-11','Glow Plug; 6.0L PS; each (set of 8)','$14.99 ea'),
+                _p('BOSCH','0250201032','Glow Plug; 6.0L','$12.99 ea'),
+                _p('NGK','Y-521U','Glow Plug','$11.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','SGD757C','Service Grade Disc Brake Pad; Front','$28.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BR-1530A','Disc Brake Pad Set; Front','$44.99'),
+                _p('AKEBONO','EUR757','EURO Ultra-Premium Ceramic; Front','$52.99'),
+                _p('POWER STOP','Z23-757','Z23 Evolution Sport; Front','$48.99'),
+              ],
+              Premium:[_p('BREMBO','P24156N','NAO Brake Pad Set; Front','$74.99')]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','9880R','R-Line Disc Brake Rotor; Front','$32.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BRCF19','Brake Rotor; Front','$54.99'),
+                _p('CENTRIC','120.65114','Premium Brake Rotor; Front','$39.99'),
+                _p('POWER STOP','AR8596','Evolution Coated Rotor; Front','$44.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','PW-530','Engine Water Pump','$89.99'),
+                _p('GATES','42545E','Premium Water Pump','$79.99'),
+                _p('DAYCO','DP979','Engine Water Pump','$74.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BXT65-750','Battery; Group 65; 750 CCA','$169.99'),
+                _p('DURALAST','65-DL','Duralast; Group 65; 750 CCA','$139.99'),
+                _p('INTERSTATE','MTP-65','Mega-Tron Plus; Group 65; 750 CCA','$149.99'),
+              ],
+              Premium:[_p('OPTIMA','8014-045','YellowTop Dual Purpose; D65; 620 CCA','$249.99')]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','WW-2118','Wiper Blade Set; 21in/18in','$24.99'),
+                _p('BOSCH','4826','ICON Beam; 26in Driver Side','$18.99'),
+                _p('TRICO','25-210','Exact Fit; 21in','$8.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── 2. Ford 5.4L V8 Triton 3-Valve 2004-2014 ───────── */
+        { id:'ford_54_3v', label:'Ford 5.4L V8 Triton (3-Valve)',
+          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && !fu.includes('Diesel') && di.startsWith('5.4') && yr>=2004 && yr<=2014,
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK6PK1890','Serpentine Belt; 6-Rib','$12.99')],
+                'Standard Replacement':[
+                  _p('GATES','K060742','Micro-V Serpentine Belt','$15.99'),
+                  _p('DAYCO','5060742','Serpentine Belt','$14.99'),
+                  _p('CONTINENTAL','4060742','Multi V-Belt; 6-Rib','$16.99'),
+                ],
+                'Heavy Duty':[_p('GATES','K060742HD','FleetRunner Heavy Duty; 6-Rib','$24.99')]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-226','Belt Tensioner','$29.99')],
+                'Standard Replacement':[
+                  _p('GATES','38434','DriveAlign Automatic Belt Tensioner','$44.99'),
+                  _p('DAYCO','89345','Automatic Belt Tensioner','$42.99'),
+                  _p('MOTORCRAFT','BT129','Drive Belt Tensioner','$54.99'),
+                ]
+              },
+              'Idler Pulley':{
+                Economy:[_p('DORMAN','419-215','Belt Idler Pulley','$18.99')],
+                'Standard Replacement':[
+                  _p('GATES','36329','Smooth Idler Pulley','$28.99'),
+                  _p('DAYCO','89098','Idler Pulley','$24.99'),
+                  _p('MOTORCRAFT','YS295','Drive Belt Idler Pulley','$29.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[
+                _p('FRAM','PH3614','Extra Guard Spin-On Oil Filter','$5.49'),
+                _p('SUPERTECH','ST3614','Spin-On Oil Filter','$3.49'),
+              ],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FL-820S','OEM Oil Filter','$9.99'),
+                _p('WIX','51069','Spin-On Oil Filter','$7.99'),
+                _p('PUROLATOR','PL14459','PureONE Oil Filter','$8.49'),
+              ],
+              Premium:[
+                _p('MOBIL 1','M1-212','Extended Performance Oil Filter','$12.99'),
+                _p('K&N','HP-7018','High Performance Gold Oil Filter','$13.99'),
+              ]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA10163','Extra Guard Air Filter','$12.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FA-1617','OEM Air Filter','$22.99'),
+                _p('WIX','42374','Air Filter','$16.99'),
+              ],
+              Premium:[_p('K&N','33-2171','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','SP-546','OEM Spark Plug; 5.4L 3V; each','$12.99 ea'),
+                _p('AUTOLITE','AP63','Double Platinum; 5.4L 3V; each','$6.99 ea'),
+                _p('NGK','LZTR5AP-11','Laser Platinum; 5.4L 3V; each','$8.99 ea'),
+              ],
+              Premium:[
+                _p('MOTORCRAFT','SP-546','OEM — Recommended by Ford; each','$12.99 ea'),
+                _p('AUTOLITE','XP63','XP Iridium Enhanced; each','$9.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','EHT1097H','Element3 Hybrid Brake Pad; Front','$34.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BR-1241A','Disc Brake Pad Set; Front','$42.99'),
+                _p('AKEBONO','EUR1097','EURO Ultra-Premium Ceramic; Front','$54.99'),
+                _p('WAGNER','MX1097','MX QuickStop Disc Pad Set; Front','$38.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','780538R','R-Line Disc Brake Rotor; Front','$29.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BRCF37','Brake Rotor; Front','$49.99'),
+                _p('CENTRIC','120.65114','Premium Brake Rotor; Front','$36.99'),
+                _p('POWER STOP','AR85107','Evolution Coated Rotor; Front','$39.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','PW-387','Engine Water Pump','$74.99'),
+                _p('GATES','43021','Premium Water Pump','$64.99'),
+                _p('DAYCO','DP815','Water Pump','$59.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BXT65-750','Battery; Group 65; 750 CCA','$169.99'),
+                _p('DURALAST','65-DL','Group 65; 750 CCA','$139.99'),
+              ],
+              Premium:[_p('OPTIMA','8014-045','YellowTop; D65; 620 CCA','$249.99')]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','WW-2118','Wiper Blade Set; 21in/18in','$24.99'),
+                _p('BOSCH','4826','ICON Beam Wiper Blade; 26in','$18.99'),
+                _p('TRICO','55-210','Steel Beam Blade; 21in','$10.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── 3. GM 5.3L V8 LS Gen IV (Silverado/Tahoe 2007-13) ─ */
+        { id:'gm_53_lsiv', label:'GM 5.3L V8 LS Gen IV',
+          match:(mk,yr,mo,di,cy,fu) => ['CHEVROLET','GMC'].includes(mk) && !fu.includes('Diesel') && di.startsWith('5.3') && yr>=2007 && yr<=2013,
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK6PK2065','Serpentine Belt; 6-Rib','$11.99')],
+                'Standard Replacement':[
+                  _p('GATES','K060937','Micro-V Serpentine Belt','$17.99'),
+                  _p('DAYCO','5060937','Serpentine Belt','$16.99'),
+                  _p('CONTINENTAL','4060937','Multi V-Belt; 6-Rib','$18.99'),
+                ]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-228','Belt Tensioner','$32.99')],
+                'Standard Replacement':[
+                  _p('GATES','38228','DriveAlign Automatic Belt Tensioner','$48.99'),
+                  _p('DAYCO','89660','Automatic Belt Tensioner','$44.99'),
+                  _p('AC DELCO','12639994','OEM Belt Tensioner','$74.99'),
+                ]
+              },
+              'Idler Pulley':{
+                Economy:[_p('DORMAN','419-244','Idler Pulley','$19.99')],
+                'Standard Replacement':[
+                  _p('GATES','36212','Smooth Idler Pulley','$28.99'),
+                  _p('AC DELCO','15-40028','OEM Idler Pulley','$34.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH3980','Extra Guard Spin-On','$5.49')],
+              'Standard Replacement':[
+                _p('AC DELCO','PF48E','OEM Engine Oil Filter','$9.99'),
+                _p('WIX','57060XP','XP Spin-On Oil Filter','$8.99'),
+                _p('PUROLATOR','PL14610','PureONE Oil Filter','$8.49'),
+              ],
+              Premium:[
+                _p('MOBIL 1','M1-206','Extended Performance Oil Filter','$12.99'),
+                _p('K&N','HP-1017','High Performance Gold Oil Filter','$13.99'),
+              ]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA9545','Extra Guard Air Filter','$13.99')],
+              'Standard Replacement':[
+                _p('AC DELCO','A3119C','OEM Air Filter','$22.99'),
+                _p('WIX','42145','Air Filter','$17.99'),
+              ],
+              Premium:[_p('K&N','33-2129','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('AC DELCO','41-162','Iridium Spark Plug; each (set of 8)','$14.99 ea'),
+                _p('NGK','TR55','V-Power Spark Plug; each','$4.99 ea'),
+                _p('AUTOLITE','65','Copper Spark Plug; each','$3.99 ea'),
+              ],
+              Premium:[
+                _p('AC DELCO','41-162','OEM Iridium — Recommended; each','$14.99 ea'),
+                _p('NGK','IFR6T11','Iridium IX Spark Plug; each','$12.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','SGD914C','Service Grade; Front','$29.99')],
+              'Standard Replacement':[
+                _p('AC DELCO','17D914CH','OEM Advantage; Front','$44.99'),
+                _p('AKEBONO','ACT914','ProACT Ultra-Premium Ceramic; Front','$54.99'),
+                _p('RAYBESTOS','MGD914CH','Element3 Metallic Hybrid; Front','$36.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','780452R','R-Line Disc Rotor; Front','$29.99')],
+              'Standard Replacement':[
+                _p('AC DELCO','18A81089A','OEM Advantage Disc Rotor; Front','$49.99'),
+                _p('CENTRIC','120.66046','Premium Disc Brake Rotor; Front','$36.99'),
+                _p('POWER STOP','AR82136','Evolution Coated Rotor; Front','$39.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('AC DELCO','252-752','OEM Engine Water Pump','$74.99'),
+                _p('GATES','43239','Premium Water Pump','$64.99'),
+                _p('DAYCO','DP967','Water Pump','$59.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('AC DELCO','94RAGM','OEM AGM Battery; Group 94R; 800 CCA','$219.99'),
+                _p('DURALAST','94R-DL','Duralast; Group 94R; 800 CCA','$179.99'),
+                _p('INTERSTATE','MTP-94R/H7','Mega-Tron Plus; 800 CCA','$189.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('AC DELCO','902-0-21','OEM Wiper Blade; 21in Driver','$19.99'),
+                _p('BOSCH','4818','ICON Beam; 18in Passenger','$16.99'),
+                _p('TRICO','55-215','Steel Beam; 21in','$10.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── 4. Toyota 3.5L V6 2GR-FE (Camry/Highlander 2007+) ─ */
+        { id:'toyota_2gr', label:'Toyota 3.5L V6 2GR-FE',
+          match:(mk,yr,mo,di,cy,fu) => mk==='TOYOTA' && di.startsWith('3.5') && cy==='6',
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK7PK1770','Serpentine Belt','$13.99')],
+                'Standard Replacement':[
+                  _p('GATES','K070763','Micro-V Serpentine Belt','$19.99'),
+                  _p('DAYCO','5070763','Serpentine Belt','$18.99'),
+                  _p('CONTINENTAL','4070763','Multi V-Belt','$20.99'),
+                ]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-101','Belt Tensioner','$29.99')],
+                'Standard Replacement':[
+                  _p('GATES','38477','DriveAlign Tensioner','$54.99'),
+                  _p('DAYCO','89464','Automatic Belt Tensioner','$49.99'),
+                  _p('TOYOTA','16620-31010','OEM Belt Tensioner','$89.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH7317','Extra Guard Spin-On','$5.49')],
+              'Standard Replacement':[
+                _p('TOYOTA','04152-YZZA6','OEM Oil Filter','$9.99'),
+                _p('WIX','57356XP','XP Spin-On Oil Filter','$9.99'),
+                _p('DENSO','150-2003','Oil Filter; 3.5L V6','$8.99'),
+              ],
+              Premium:[_p('K&N','HP-1004','High Performance Gold Oil Filter','$13.99')]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA10241','Extra Guard Air Filter','$13.99')],
+              'Standard Replacement':[
+                _p('TOYOTA','17801-0P030','OEM Air Filter','$29.99'),
+                _p('WIX','42782','Air Filter','$18.99'),
+              ],
+              Premium:[_p('K&N','33-2171','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('DENSO','5306','Iridium Long-Life Spark Plug; each','$12.99 ea'),
+                _p('NGK','ILKAR7L11','Iridium Laser Spark Plug; each','$13.99 ea'),
+                _p('NGK','LKAR7AIX','Iridium IX Spark Plug; each','$10.99 ea'),
+              ],
+              Premium:[_p('DENSO','5306','OEM Style Iridium — Recommended; each','$12.99 ea')]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','EHT1655H','Element3 Hybrid; Front','$34.99')],
+              'Standard Replacement':[
+                _p('AKEBONO','EUR1655','EURO Ultra-Premium Ceramic; Front','$54.99'),
+                _p('TOYOTA','04465-02370','OEM Front Brake Pad Set','$79.99'),
+                _p('POWER STOP','Z23-1655','Z23 Evolution Sport; Front','$48.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','680459R','R-Line Disc Rotor; Front','$29.99')],
+              'Standard Replacement':[
+                _p('TOYOTA','43512-06171','OEM Front Disc Brake Rotor','$69.99'),
+                _p('CENTRIC','121.44132','C-TEK Standard Rotor; Front','$32.99'),
+                _p('POWER STOP','EBR986','Evolution Coated Rotor; Front','$39.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('AISIN','WPT-192','OEM Water Pump; w/ Gasket','$69.99'),
+                _p('GATES','42469','Premium Water Pump','$59.99'),
+                _p('DAYCO','DP975','Water Pump','$54.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('TOYOTA','00544-25060-550','OEM Battery; Group 24F; 550 CCA','$189.99'),
+                _p('DURALAST','24F-DL','Group 24F; 550 CCA','$139.99'),
+                _p('OPTIMA','8040-218','RedTop; Group 35; 720 CCA','$219.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('TOYOTA','85222-06290','OEM Wiper Blade; 26in Driver','$29.99'),
+                _p('BOSCH','4826','ICON Beam; 26in Driver','$18.99'),
+                _p('TRICO','55-260','Steel Beam; 26in','$10.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── 5. Honda 2.4L I4 K24 (Accord/CR-V 2003-2012) ───── */
+        { id:'honda_k24', label:'Honda 2.4L I4 K24',
+          match:(mk,yr,mo,di,cy,fu) => mk==='HONDA' && di.startsWith('2.4') && cy==='4',
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK4PK900','Serpentine Belt; 4-Rib','$9.99')],
+                'Standard Replacement':[
+                  _p('GATES','K040358','Micro-V Serpentine Belt','$12.99'),
+                  _p('DAYCO','5040358','Serpentine Belt','$11.99'),
+                  _p('CONTINENTAL','4040358','Multi V-Belt','$13.99'),
+                ]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-043','Belt Tensioner','$24.99')],
+                'Standard Replacement':[
+                  _p('GATES','38212','DriveAlign Tensioner','$39.99'),
+                  _p('DAYCO','89418','Automatic Belt Tensioner','$37.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH6607','Extra Guard Spin-On','$5.49')],
+              'Standard Replacement':[
+                _p('HONDA','15400-PLM-A02','OEM Oil Filter','$9.99'),
+                _p('WIX','57060XP','XP Spin-On Oil Filter','$8.99'),
+                _p('MOBIL 1','M1-110','Extended Performance Oil Filter','$11.99'),
+              ],
+              Premium:[_p('K&N','HP-1004','High Performance Gold Oil Filter','$13.99')]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA5316','Extra Guard Air Filter','$12.99')],
+              'Standard Replacement':[
+                _p('HONDA','17220-RAA-A01','OEM Air Filter','$24.99'),
+                _p('WIX','42189','Air Filter','$15.99'),
+              ],
+              Premium:[_p('K&N','33-2211','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('NGK','IZFR6K11','Laser Iridium Spark Plug; each','$13.99 ea'),
+                _p('HONDA','12290-RAA-A01','OEM Spark Plug; each','$14.99 ea'),
+                _p('DENSO','3297','Iridium TT Spark Plug; each','$11.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','MGD1369CH','Element3 Metallic; Front','$32.99')],
+              'Standard Replacement':[
+                _p('HONDA','06450-S9A-505','OEM Front Brake Pad Set','$59.99'),
+                _p('AKEBONO','ACT1369','ProACT Ceramic; Front','$49.99'),
+                _p('POWER STOP','Z23-1369','Z23 Evolution Sport; Front','$44.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','680460R','R-Line Disc Rotor; Front','$27.99')],
+              'Standard Replacement':[
+                _p('HONDA','45251-S9A-010','OEM Front Brake Rotor','$69.99'),
+                _p('CENTRIC','121.40038','C-TEK Standard Rotor; Front','$29.99'),
+                _p('POWER STOP','EBR987','Evolution Coated Rotor; Front','$36.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('AISIN','WPH-007','Water Pump; w/ Gasket','$54.99'),
+                _p('GATES','42139','Premium Water Pump','$49.99'),
+                _p('HONDA','19200-RAA-A01','OEM Water Pump','$89.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('HONDA','31500-TZ5-AC1MH','OEM Battery; 410 CCA','$149.99'),
+                _p('DURALAST','51R-DL','Group 51R; 410 CCA','$99.99'),
+                _p('INTERSTATE','MTP-51R','Mega-Tron Plus; 410 CCA','$109.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('HONDA','76622-SDA-A01','OEM Wiper Blade; 24in Driver','$24.99'),
+                _p('BOSCH','4824','ICON Beam; 24in Driver','$17.99'),
+                _p('TRICO','55-240','Steel Beam; 24in','$9.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── 6. Ram 5.7L HEMI V8 (Ram 1500/2500 2009+) ──────── */
+        { id:'ram_57_hemi', label:'Ram 5.7L HEMI V8',
+          match:(mk,yr,mo,di,cy,fu) => mk==='RAM' && !fu.includes('Diesel') && di.startsWith('5.7') && yr>=2009,
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK6PK2015','Serpentine Belt; 6-Rib','$12.99')],
+                'Standard Replacement':[
+                  _p('GATES','K060793','Micro-V Serpentine Belt','$16.99'),
+                  _p('DAYCO','5060793','Serpentine Belt','$15.99'),
+                  _p('CONTINENTAL','4060793','Multi V-Belt; 6-Rib','$17.99'),
+                ]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-233','Belt Tensioner','$32.99')],
+                'Standard Replacement':[
+                  _p('GATES','38486','DriveAlign Tensioner','$49.99'),
+                  _p('DAYCO','89560','Automatic Belt Tensioner','$46.99'),
+                  _p('MOPAR','4627072AA','OEM Belt Tensioner','$79.99'),
+                ]
+              },
+              'Idler Pulley':{
+                Economy:[_p('DORMAN','419-501','Idler Pulley','$19.99')],
+                'Standard Replacement':[
+                  _p('GATES','36310','Smooth Idler Pulley','$27.99'),
+                  _p('MOPAR','4627032AA','OEM Idler Pulley','$39.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH16','Extra Guard Spin-On','$5.49')],
+              'Standard Replacement':[
+                _p('MOPAR','05038051AA','OEM Oil Filter; 5.7L HEMI','$8.99'),
+                _p('WIX','57356XP','XP Spin-On Oil Filter','$9.49'),
+                _p('PUROLATOR','PL14610','PureONE Oil Filter','$8.99'),
+              ],
+              Premium:[_p('MOBIL 1','M1-206','Extended Performance Oil Filter','$12.99')]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA10173','Extra Guard Air Filter','$14.99')],
+              'Standard Replacement':[
+                _p('MOPAR','53034018AA','OEM Air Filter; 5.7L HEMI','$24.99'),
+                _p('WIX','42889','Air Filter','$18.99'),
+              ],
+              Premium:[_p('K&N','33-2257','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('MOPAR','SP149966AA','OEM Spark Plug; 5.7L HEMI; each','$6.99 ea'),
+                _p('NGK','5787','V-Power Spark Plug; each','$4.99 ea'),
+                _p('CHAMPION','570','Copper Plus Spark Plug; each','$3.99 ea'),
+              ],
+              Premium:[
+                _p('MOPAR','SP149966AA','OEM — Recommended; each','$6.99 ea'),
+                _p('NGK','6510','Iridium IX Spark Plug; each','$11.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','EHT1214H','Element3 Hybrid; Front','$36.99')],
+              'Standard Replacement':[
+                _p('MOPAR','68048514AC','OEM Front Brake Pad Set','$54.99'),
+                _p('AKEBONO','ACT1214','ProACT Ultra-Premium Ceramic; Front','$54.99'),
+                _p('POWER STOP','Z23-1214','Z23 Evolution Sport; Front','$48.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','980485R','R-Line Disc Rotor; Front','$34.99')],
+              'Standard Replacement':[
+                _p('MOPAR','68190128AB','OEM Front Brake Rotor','$79.99'),
+                _p('CENTRIC','120.67063','Premium Disc Brake Rotor; Front','$42.99'),
+                _p('POWER STOP','AR85115','Evolution Coated Rotor; Front','$46.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('MOPAR','4727AA','OEM Battery; Group 65; 750 CCA','$169.99'),
+                _p('DURALAST','65-DL','Group 65; 750 CCA','$139.99'),
+                _p('OPTIMA','8014-045','YellowTop; D65; 620 CCA','$249.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('MOPAR','82212829AB','OEM Wiper Blade Set','$29.99'),
+                _p('BOSCH','4826','ICON Beam; 26in Driver','$18.99'),
+                _p('TRICO','55-260','Steel Beam; 26in','$10.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── 7. Generic fallback for all other vehicles ─────── */
+        { id:'generic', label:'Generic Maintenance Parts',
+          match:() => true,
+          cats:{
+            'Oil Filter':{
+              Economy:[
+                _p('FRAM','(vehicle specific)','Extra Guard Spin-On Oil Filter — search your engine size','~$5-7'),
+              ],
+              'Standard Replacement':[
+                _p('WIX','(vehicle specific)','XP Spin-On Oil Filter — search make/model/year','~$8-10'),
+                _p('PUROLATOR','(vehicle specific)','PureONE Oil Filter — search make/model/year','~$8-10'),
+              ],
+              Premium:[_p('MOBIL 1','(vehicle specific)','Extended Performance Oil Filter','~$12-15')]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','(vehicle specific)','Extra Guard Air Filter — search make/model/year','~$13-16')],
+              'Standard Replacement':[_p('WIX','(vehicle specific)','OEM-Grade Air Filter — search make/model/year','~$16-22')],
+              Premium:[_p('K&N','(vehicle specific)','High-Flow Washable/Reusable Air Filter','~$55-65')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('NGK','(vehicle specific)','V-Power Spark Plug — search engine specs; each','~$4-8 ea'),
+                _p('DENSO','(vehicle specific)','Iridium TT Spark Plug — search engine specs; each','~$10-14 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','(vehicle specific)','Service Grade Disc Brake Pad; Front','~$28-40')],
+              'Standard Replacement':[
+                _p('AKEBONO','(vehicle specific)','Ultra-Premium Ceramic Brake Pad; Front','~$48-65'),
+                _p('POWER STOP','(vehicle specific)','Z23 Evolution Sport; Front','~$44-58'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','(vehicle specific)','R-Line Disc Brake Rotor; Front','~$28-36')],
+              'Standard Replacement':[
+                _p('CENTRIC','(vehicle specific)','Premium Disc Brake Rotor; Front','~$35-50'),
+                _p('POWER STOP','(vehicle specific)','Evolution Coated Rotor; Front','~$38-52'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('DURALAST','(vehicle specific)','Duralast Battery — search group size for your vehicle','~$100-180'),
+                _p('INTERSTATE','(vehicle specific)','Mega-Tron Plus — search group size','~$110-190'),
+              ],
+              Premium:[_p('OPTIMA','(vehicle specific)','RedTop or YellowTop — search application','~$200-260')]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('BOSCH','(vehicle specific)','ICON Beam Wiper Blade — measure driver/pass sizes','~$15-22'),
+                _p('TRICO','(vehicle specific)','Steel Beam Wiper Blade — measure driver/pass sizes','~$8-12'),
+              ]
+            }
+          }
+        }
+      ],
+
+      find(make, year, model, disp, cyl, fuel) {
+        const mk  = String(make || '').toUpperCase().trim();
+        const yr  = parseInt(year) || 0;
+        const mo  = String(model || '').toUpperCase();
+        const di  = String(disp  || '').replace(/L$/i,'').trim();
+        const cy  = String(cyl   || '').trim();
+        const fu  = String(fuel  || '').trim();
+        for (const pl of this.platforms) {
+          try { if (pl.id !== 'generic' && pl.match(mk, yr, mo, di, cy, fu)) return pl; }
+          catch {}
+        }
+        return this.platforms.find(pl => pl.id === 'generic');
       }
-      return null;
-    }
+    };
 
-    // ─── URL builder (preserve hyphens: E-350, F-150, C-Max) ───
-    function buildRockAutoUrl(year, make, model, engine) {
-      const m  = (make  || '').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
-      const mo = (model || '').toLowerCase().replace(/\s+/g, '+').replace(/[^a-z0-9+\-]/g, '');
-      const e  = engine ? ',' + (engine).toLowerCase().replace(/\s+/g, '+').replace(/[^a-z0-9+.]/g, '') : '';
-      return `${RA}/en/catalog/${m},${year},${mo}${e}`;
-    }
-
-    // ─── Fallback category cards ───────────────────────────────
-    const PART_CATS = [
-      { name: 'Belt Drive',           icon: '➰', term: 'belt serpentine belt tensioner' },
-      { name: 'Oil Filter',           icon: '🔧', term: 'oil filter' },
-      { name: 'Air Filter',           icon: '💨', term: 'air filter' },
-      { name: 'Cabin Air Filter',     icon: '🌬️', term: 'cabin air filter' },
-      { name: 'Fuel Filter',          icon: '⛽', term: 'fuel filter' },
-      { name: 'Brake Pads (Front)',   icon: '🛑', term: 'front brake pads' },
-      { name: 'Brake Rotors (Front)', icon: '⚙️', term: 'front brake rotors' },
-      { name: 'Spark Plugs',          icon: '⚡', term: 'spark plugs' },
-      { name: 'Battery',              icon: '🔋', term: 'car battery' },
-      { name: 'Water Pump',           icon: '💧', term: 'water pump' },
-      { name: 'Alternator',           icon: '⚡', term: 'alternator' },
-      { name: 'Wiper Blades',         icon: '🌧️', term: 'wiper blades' },
-      { name: 'Headlight Bulbs',      icon: '💡', term: 'headlight bulbs' },
-      { name: 'Ignition Coils',       icon: '🔌', term: 'ignition coils' },
-    ];
-
-    function buildPartLinks(year, make, model, cat) {
-      const q  = encodeURIComponent(`${year} ${make} ${model} ${cat.term}`);
-      const yr = encodeURIComponent(year), mk = encodeURIComponent(make), mo = encodeURIComponent(model);
-      return {
-        rockauto: buildRockAutoUrl(year, make, model),
-        autozone: `https://www.autozone.com/searchresult?searchText=${encodeURIComponent(year+' '+make+' '+model+' '+cat.term)}`,
-        oreilly:  `https://www.oreillyauto.com/shop/b?year=${yr}&make=${mk}&model=${mo}&q=${encodeURIComponent(cat.term)}`,
-        napa:     `https://www.napaonline.com/en/search?q=${q}`,
-        ebay:     `https://www.ebay.com/sch/i.html?_nkw=${q}&_sacat=6030`,
-      };
-    }
-
-    // ─── Paste & parse fallback ────────────────────────────────
-    function renderPasteArea(year, make, model, raUrl, container) {
-      const wrap = document.createElement('div');
-      wrap.className = 'ra-paste-wrap';
-      wrap.innerHTML = `
-        <p class="ra-paste-note">
-          The automatic fetch was blocked by RockAuto. To display parts here:
-        </p>
-        <ol class="ra-paste-steps">
-          <li>Open <a href="${raUrl}" target="_blank" rel="noopener noreferrer">RockAuto for ${escapeHtml(year+' '+make+' '+model)} ↗</a></li>
-          <li>Click a part category (e.g. <strong>Belt Drive</strong>) and expand all sections</li>
-          <li>Select all text on the page <kbd>Ctrl+A</kbd> then copy <kbd>Ctrl+C</kbd></li>
-          <li>Paste below and click <strong>Show Parts</strong></li>
-        </ol>
-        <div class="ra-paste-row">
-          <input id="raCatName" type="text" placeholder="Category name (e.g. Belt Drive)" />
-          <button class="btn" onclick="parsePastedData()">Show Parts</button>
-        </div>
-        <textarea id="raPaste" placeholder="Paste copied RockAuto text here…" rows="7"></textarea>
-        <div id="pasteResult"></div>`;
-      container.appendChild(wrap);
-    }
-
-    function parsePastedData() {
-      const raw     = ($('raPaste')?.value || '').trim();
-      const catName = ($('raCatName')?.value || 'Parts').trim();
-      const out     = $('pasteResult');
-      if (!out) return;
-      if (!raw) { out.innerHTML = '<p class="parts-api-error">Paste some text first.</p>'; return; }
-
-      let tiers = parsePartsText(raw);
-      const tot = Object.values(tiers).reduce((s, a) => s + a.length, 0);
-      if (!tot) {
-        out.innerHTML = '<p class="parts-api-error">No parts found in pasted text — make sure you copied the full parts listing from RockAuto.</p>';
-        return;
-      }
-      out.innerHTML = '';
-      renderPartsTable(tiers, catName, out);
-    }
-
-    // ─── Main entry point ──────────────────────────────────────
-    async function fetchAndRenderParts(year, make, model, engine) {
+    // ─── Parts lookup & render ─────────────────────────────────
+    function fetchAndRenderParts(year, make, model, engine) {
       const loading  = $('aiPartsLoading');
       const content  = $('aiPartsContent');
-      const statusEl = loading.querySelector('p');
-      loading.style.display = 'flex';
+      loading.style.display = 'none';
       content.innerHTML = '';
 
-      const vehicleStr = [year, make, model, engine].filter(Boolean).join(' ');
-      const raUrl      = buildRockAutoUrl(year, make, model, engine);
+      // Resolve extra decoded fields stored on the vehicle object
+      const veh   = window.__currentVehicle || {};
+      const disp  = veh['Displacement (L)']  || veh['Engine'] || '';
+      const cyl   = veh['Engine Number of Cylinders'] || '';
+      const fuel  = veh['Fuel Type - Primary'] || veh['Fuel'] || '';
 
-      const countEl = document.createElement('p');
-      countEl.className = 'parts-progress';
-      countEl.style.cssText = 'font-size:0.85rem;color:var(--muted);margin:0 0 12px';
-      content.appendChild(countEl);
+      const platform = VP.find(make, year, model, disp, cyl, fuel);
 
-      try {
-        if (statusEl) statusEl.textContent = 'Connecting to RockAuto…';
+      // Header
+      const badge = document.createElement('div');
+      badge.className = 'parts-platform-badge';
+      badge.innerHTML = `Parts catalog: <strong>${escapeHtml(platform.label)}</strong>`;
+      content.appendChild(badge);
 
-        const html = await proxyFetch(raUrl);
-        if (!html || html.length < 400) throw new Error('Proxy blocked or empty');
+      // Render every category
+      const TIER_ORDER = ['Economy','Standard Replacement','Heavy Duty','Professional','Premium','Kit'];
 
-        // Does this page already contain tier data? (single-engine vehicles)
-        if (TIERS.some(t => html.includes(t))) {
-          let tiers = parsePartsHtml(html);
-          if (!Object.values(tiers).reduce((s, a) => s + a.length, 0))
-            tiers = parsePartsText(html);
-          const tot = Object.values(tiers).reduce((s, a) => s + a.length, 0);
-          if (tot) {
-            content.removeChild(countEl);
-            renderPartsTable(tiers, `${year} ${make} ${model} Parts`, content);
-            loading.style.display = 'none';
-            return;
-          }
-        }
+      Object.entries(platform.cats).forEach(([catName, catData]) => {
+        // catData is either { tier → [parts] } directly, or { subcat → { tier → [parts] } }
+        const firstVal = Object.values(catData)[0];
+        const isFlat   = Array.isArray(firstVal); // flat: {tier:[parts]}
+        const isNested = !isFlat && typeof firstVal === 'object' && !Array.isArray(firstVal) &&
+                         Object.values(firstVal)[0] !== undefined;
 
-        // Extract all real category links (with carmenunode)
-        const cats = extractCategoryLinks(html);
-        if (!cats.length) throw new Error('No categories found on catalog page');
-
-        if (statusEl) statusEl.textContent = `Loading all ${cats.length} categories…`;
-        countEl.textContent = `Found ${cats.length} categories — fetching all parts…`;
-
-        let loaded = 0, failed = 0;
-
-        // Fetch all categories in parallel batches of 3
-        const BATCH = 3;
-        for (let i = 0; i < cats.length; i += BATCH) {
-          const batch = cats.slice(i, i + BATCH);
-          await Promise.all(batch.map(async ({ name, url }) => {
-            try {
-              const catHtml = await proxyFetch(url, 10000);
-              if (!catHtml) { failed++; return; }
-
-              let tiers = parsePartsHtml(catHtml);
-              if (!Object.values(tiers).reduce((s, a) => s + a.length, 0))
-                tiers = parsePartsText(catHtml);
-              const tot = Object.values(tiers).reduce((s, a) => s + a.length, 0);
-
-              if (tot) {
-                renderPartsTable(tiers, name, content);
-                loaded++;
-              } else {
-                failed++;
-              }
-            } catch { failed++; }
-          }));
-
-          countEl.textContent = `Loaded ${loaded} of ${cats.length} categories…`;
-          if (i + BATCH < cats.length) await new Promise(r => setTimeout(r, 200));
-        }
-
-        content.removeChild(countEl);
-
-        if (!loaded) throw new Error('All category fetches failed');
-
-        if (failed) {
-          const note = document.createElement('p');
-          note.style.cssText = 'font-size:0.82rem;color:var(--muted);margin:8px 0 0';
-          note.textContent = `${failed} categories could not be fetched (RockAuto rate-limited the proxy).`;
-          content.appendChild(note);
-        }
-
-      } catch {
-        content.innerHTML = '';
-        renderPasteArea(year, make, model, raUrl, content);
-      }
-
-      loading.style.display = 'none';
-    }
-
-
-
-    // ─── Parse RockAuto catalog HTML for category links ─────────
-    function extractCategoryLinks(html) {
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const seen = new Set();
-      const cats = [];
-      // Category links contain a numeric carmenunode in the path
-      doc.querySelectorAll('a[href]').forEach(a => {
-        const href = a.getAttribute('href') || '';
-        const text = a.textContent.trim();
-        if (
-          /\/en\/catalog\/[^"]+,\d{5,}/.test(href) &&
-          text && text.length > 1 && text.length < 60 &&
-          !seen.has(text) && !text.match(/RockAuto|^Select|^\d/)
-        ) {
-          seen.add(text);
-          cats.push({ name: text, url: href.startsWith('http') ? href : RA + href });
-        }
-      });
-      return cats;
-    }
-
-    // ─── Parse parts from a category-page HTML or its text ─────
-    const TIERS = ['Standard Replacement', 'Economy', 'Heavy Duty', 'Premium', 'Kit', 'Professional'];
-
-    function parsePartsHtml(html) {
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const tiers = {};
-      let tier = 'Standard Replacement';
-
-      // Walk every element to track tier headers and listing rows together
-      const allEls = doc.querySelectorAll('*');
-      allEls.forEach(el => {
-        const cls  = (el.className || '').toString();
-        const text = (el.textContent || '').trim();
-
-        // Tier header detection
-        if (cls.includes('listing-type') || cls.includes('tier') || cls.includes('group-header')) {
-          const match = TIERS.find(t => text.startsWith(t));
-          if (match) { tier = match; return; }
-        }
-
-        // Part row detection
-        const isTr = el.tagName === 'TR';
-        const isListingRow = isTr && (cls.includes('listing') || (el.id || '').includes('listing'));
-        const isGenericRow = isTr && !isListingRow &&
-          /\$[\d.]+/.test(text) && el.querySelectorAll('td').length >= 3;
-
-        if (!isListingRow && !isGenericRow) return;
-
-        const cells = [...el.querySelectorAll('td')];
-        let brand = '', partNumber = '', description = '', price = '';
-
-        cells.forEach(td => {
-          const c = (td.className || '').toString();
-          const v = td.textContent.trim();
-          if (c.includes('label') || c.includes('brand'))  brand       = v;
-          else if (c.includes('info-code') || c.includes('partnum')) partNumber = v.split(/\s/)[0];
-          else if (c.includes('note')  || c.includes('descript'))    description = v;
-          else if (c.includes('price') || /^\$[\d.]+$/.test(v))      price = (v.match(/\$[\d.]+/) || [''])[0];
-        });
-
-        // Generic fallback — scan cells for all-caps brand then alphanum part#
-        if (!brand && cells.length >= 2) {
-          cells.forEach(td => {
-            const v = td.textContent.trim();
-            if (!brand && /^[A-Z][A-Z &\-]{1,20}$/.test(v)) { brand = v; return; }
-            if (brand && !partNumber && /^[A-Z0-9]{3,15}$/.test(v)) { partNumber = v; return; }
-            if (!price) { const pm = v.match(/\$[\d.]+/); if (pm) price = pm[0]; }
+        if (isFlat) {
+          // Standard: { tier → [parts] }
+          renderPartsTable(catData, catName, content);
+        } else {
+          // Nested: { subcat → { tier → [parts] } }
+          Object.entries(catData).forEach(([subcatName, tierData]) => {
+            renderPartsTable(tierData, `${catName} › ${subcatName}`, content);
           });
         }
-
-        if (!brand && !partNumber) return;
-        if (!tiers[tier]) tiers[tier] = [];
-        tiers[tier].push({ brand, partNumber, description, price });
       });
-
-      return tiers;
     }
 
-    // Text-based extraction when HTML parsing yields nothing
-    function parsePartsText(rawText) {
-      const tiers = {};
-      let tier = 'Standard Replacement';
-      const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const tm = TIERS.find(t => line === t || line === t + ' collapse');
-        if (tm) { tier = tm; continue; }
-
-        // BRAND PARTNUM rest…
-        const m = line.match(/^([A-Z][A-Z &\-]{1,22}?)\s{2,}([A-Z0-9]{3,15})\s+(.*)$/);
-        if (!m) {
-          // also try single-space split if the part# is clearly identifiable
-          const m2 = line.match(/^([A-Z]{2,}(?:\s[A-Z]+)?)\s+([A-Z0-9]{4,15})\s*(.*)?$/);
-          if (!m2) continue;
-          const [, b, pn, rest = ''] = m2;
-          let price = '', desc = rest.replace(/\bInfo\b.*$/, '').trim();
-          for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
-            const pm = lines[j].match(/^\$([\d.]+)/);
-            if (pm) { price = '$' + pm[1]; break; }
-            if (lines[j] && !lines[j].match(/^(Add to Cart|Part image|Choose|\d+|<|>|One of)/i) && !desc)
-              desc = lines[j];
-          }
-          if (!tiers[tier]) tiers[tier] = [];
-          tiers[tier].push({ brand: b.trim(), partNumber: pn.trim(), description: desc, price });
-          continue;
-        }
-        const [, b, pn, rest] = m;
-        let price = '', desc = rest.replace(/\bInfo\b.*$/, '').trim();
-        for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
-          const pm = lines[j].match(/^\$([\d.]+)/);
-          if (pm) { price = '$' + pm[1]; break; }
-          if (lines[j] && !lines[j].match(/^(Add to Cart|Part image|Choose|\d+|<|>|One of)/i) && !desc)
-            desc = lines[j];
-        }
-        if (!tiers[tier]) tiers[tier] = [];
-        tiers[tier].push({ brand: b.trim(), partNumber: pn.trim(), description: desc, price });
-      }
-      return tiers;
-    }
-
-    // ─── Render a parts table for one category ─────────────────
     const TIER_COLORS = {
       'Standard Replacement': '#1d4ed8',
       'Economy':              '#b45309',
@@ -1169,7 +1542,10 @@
     };
 
     function renderPartsTable(tiers, categoryName, container) {
-      const total = Object.values(tiers).reduce((s, a) => s + a.length, 0);
+      const TIER_ORDER = ['Economy','Standard Replacement','Heavy Duty','Professional','Premium','Kit'];
+      const ordered = TIER_ORDER.filter(t => tiers[t]?.length)
+        .concat(Object.keys(tiers).filter(t => !TIER_ORDER.includes(t) && tiers[t]?.length));
+      const total = ordered.reduce((s, t) => s + tiers[t].length, 0);
       if (!total) return 0;
 
       const wrap = document.createElement('div');
@@ -1180,8 +1556,8 @@
       hdr.innerHTML = `<span>📦</span> ${escapeHtml(categoryName)} <span class="catalog-count">${total} parts</span>`;
       wrap.appendChild(hdr);
 
-      Object.entries(tiers).forEach(([tier, parts]) => {
-        if (!parts.length) return;
+      ordered.forEach(tier => {
+        const parts = tiers[tier];
         const tb = document.createElement('div');
         tb.className = 'ra-tier-bar';
         tb.style.background = TIER_COLORS[tier] || '#334155';
@@ -1202,7 +1578,7 @@
           tr.innerHTML = `
             <td class="ra-brand-cell"><span class="ra-brand">${escapeHtml(p.brand||'')}</span></td>
             <td><code class="ra-pn">${escapeHtml(p.partNumber||'')}</code></td>
-            <td class="ra-desc-cell"><span>${escapeHtml(p.description||'')}</span></td>
+            <td class="ra-desc-cell">${escapeHtml(p.description||'')}</td>
             <td class="ra-price-cell">${escapeHtml(p.price||'')}</td>
             <td class="ra-action-cell">
               <a href="https://www.google.com/search?q=${gQ}&tbm=shop" target="_blank" rel="noopener noreferrer" class="ra-buy-btn">Shop</a>
@@ -1215,6 +1591,8 @@
       container.appendChild(wrap);
       return total;
     }
+
+
 
     function renderVehicle(results, vin) {
       const year = getDecodedValue(results, 'Model Year');
