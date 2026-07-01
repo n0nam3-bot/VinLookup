@@ -928,6 +928,84 @@
               ],
               Premium:[_p('OPTIMA','8014-045','YellowTop Dual Purpose; D65; 620 CCA','$249.99')]
             },
+            'Radiator':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','3C3Z-8005-CA','OEM Radiator; 6.0L Power Stroke','$189.99'),
+                _p('DENSO','221-9172','Engine Cooling Radiator; 6.0L PS','$149.99'),
+                _p('MISHIMOTO','MMRAD-F2D-03','Performance Aluminum Radiator; 6.0L PS','$299.99'),
+                _p('CSF','2895','All-Aluminum Radiator; 6.0L PS','$159.99'),
+              ]
+            },
+            'Radiator Hose (Upper)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','KM-3960','Upper Radiator Hose; 6.0L PS','$22.99'),
+                _p('GATES','22787','Upper Radiator Coolant Hose; 6.0L PS','$16.99'),
+              ]
+            },
+            'Radiator Hose (Lower)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','KM-3961','Lower Radiator Hose; 6.0L PS','$24.99'),
+                _p('GATES','22788','Lower Radiator Coolant Hose; 6.0L PS','$17.99'),
+              ]
+            },
+            'EGR Valve':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','CM-5162','EGR Valve; 6.0L Power Stroke','$124.99'),
+                _p('DORMAN','911-230','EGR Valve; 6.0L PS','$89.99'),
+                _p('STANDARD MOTOR','EGV1014','EGR Valve; 6.0L PS','$99.99'),
+              ]
+            },
+            'Brake Caliper (Front)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BRCF-8','Disc Brake Caliper; Front Left','$94.99'),
+                _p('MOTORCRAFT','BRCF-9','Disc Brake Caliper; Front Right','$94.99'),
+                _p('RAYBESTOS','FRC11281','R-Line Brake Caliper; Front Left','$65.99'),
+                _p('RAYBESTOS','FRC11282','R-Line Brake Caliper; Front Right','$65.99'),
+              ]
+            },
+            'Power Steering Pump':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','STP-116','Power Steering Pump; 6.0L PS','$189.99'),
+                _p('CARDONE','96-5408','Reman Power Steering Pump; w/ Core','$129.99'),
+                _p('GATES','PSP0098','Premium Power Steering Pump','$149.99'),
+              ]
+            },
+            'Transmission Filter Kit':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FT-100','Auto Transmission Filter; 4R100','$19.99'),
+                _p('WIX','58953','Transmission Filter Kit; 4R100; w/ Gasket','$16.99'),
+                _p('FRAM','FT1093A','Transmission Filter Kit; 4R100','$14.99'),
+              ]
+            },
+            'Ball Joint (Lower)':{
+              'Standard Replacement':[
+                _p('MOOG','K80264','Lower Ball Joint; Front Left','$48.99'),
+                _p('MOOG','K80265','Lower Ball Joint; Front Right','$48.99'),
+                _p('DORMAN','521-023','Lower Ball Joint; Front Left','$34.99'),
+              ]
+            },
+            'Sway Bar Link':{
+              'Standard Replacement':[
+                _p('MOOG','K80043','Stabilizer Bar Link; Front Left','$22.99'),
+                _p('MOOG','K80044','Stabilizer Bar Link; Front Right','$22.99'),
+                _p('DORMAN','536-261','Sway Bar End Link; Front Left','$16.99'),
+              ]
+            },
+            'Alternator':{
+              Economy:[_p('REMY','94214','Reman Alternator; 110A; w/ Core','$119.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','GL-8629','OEM Alternator; 6.0L PS; 110A','$229.99'),
+                _p('BOSCH','AL7430N','Premium New Alternator; 110A','$159.99'),
+                _p('DENSO','210-5306','Reman Alternator; 110A; w/ Core','$139.99'),
+              ]
+            },
+            'Starter Motor':{
+              Economy:[_p('REMY','95405','Reman Starter Motor; w/ Core','$89.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','SA-798','OEM Starter Motor; 6.0L PS','$199.99'),
+                _p('BOSCH','SR4165X','Premium Starter Motor','$149.99'),
+              ]
+            },
             'Wiper Blades':{
               'Standard Replacement':[
                 _p('MOTORCRAFT','WW-2118','Wiper Blade Set; 21in/18in','$24.99'),
@@ -2374,8 +2452,16 @@
         );
         const isGas = !isDiesel;
 
-        // Helper: displacement starts-with allowing "6" to match "6.0", "6.4", etc only if exact
-        const dispIs = (prefix) => di === prefix || di.startsWith(prefix + '.') || di.startsWith(prefix);
+        // dispIs: float-compare displacement so "6" matches "6.0", "5" matches "5.4", etc
+        const dispIs = (prefix) => {
+          if (!di) return false;
+          const diF = parseFloat(di);
+          const prF = parseFloat(prefix);
+          if (isNaN(diF) || isNaN(prF)) return di === prefix || di.startsWith(prefix);
+          // exact float match OR integer di matches the same integer part of prefix
+          return Math.abs(diF - prF) < 0.05 ||
+                 (Number.isInteger(diF) && Math.floor(prF) === diF && prF - diF < 1);
+        };
 
         for (const pl of this.platforms) {
           try {
@@ -2533,6 +2619,283 @@
           ['GSP',              'New CV Axle Shaft; Front; each',                     '~$62-110 ea','GSP CV axle shaft front'],
           ['DORMAN',           'CV Axle Shaft; Front Left or Right; each',           '~$55-100 ea','Dorman CV axle shaft front'],
           ['CARDONE',          'Remanufactured CV Axle Shaft; Front; each',          '~$45-85 ea','Cardone CV axle shaft front'],
+        ]},
+
+        /* ── Cooling System ──────────────────────────────── */
+        { n:'Radiator', rows:[
+          ['OEM',              'OEM Engine Cooling Radiator',                        '~$180-350',  'OEM radiator'],
+          ['DENSO',            'Engine Cooling Radiator',                            '~$120-220',  'Denso radiator'],
+          ['CSF',              'All-Aluminum Cooling Radiator',                      '~$110-200',  'CSF radiator'],
+          ['SPECTRA PREMIUM',  'Complete Radiator Assembly',                         '~$100-185',  'Spectra Premium radiator'],
+          ['MISHIMOTO',        'Performance Aluminum Radiator',                      '~$200-400',  'Mishimoto radiator'],
+        ]},
+        { n:'Radiator Hose — Upper', rows:[
+          ['MOTORCRAFT / OEM', 'OEM Upper Radiator Hose',                            '~$18-38',    'OEM upper radiator hose'],
+          ['GATES',            'Upper Radiator Coolant Hose',                        '~$14-28',    'Gates upper radiator hose'],
+          ['DAYCO',            'Upper Radiator Hose',                                '~$12-24',    'Dayco upper radiator hose'],
+        ]},
+        { n:'Radiator Hose — Lower', rows:[
+          ['MOTORCRAFT / OEM', 'OEM Lower Radiator Hose',                            '~$18-38',    'OEM lower radiator hose'],
+          ['GATES',            'Lower Radiator Coolant Hose',                        '~$14-28',    'Gates lower radiator hose'],
+          ['DAYCO',            'Lower Radiator Hose',                                '~$12-24',    'Dayco lower radiator hose'],
+        ]},
+        { n:'Coolant Reservoir / Overflow Tank', rows:[
+          ['DORMAN',           'Coolant Reservoir / Overflow Tank',                  '~$22-55',    'Dorman coolant reservoir overflow tank'],
+          ['OEM',              'OEM Coolant Recovery Reservoir',                     '~$35-80',    'OEM coolant reservoir'],
+          ['SPECTRA PREMIUM',  'Coolant Reservoir',                                  '~$24-50',    'Spectra Premium coolant reservoir'],
+        ]},
+        { n:'Cooling Fan Clutch', rows:[
+          ['HAYDEN',           'Thermal Fan Clutch',                                 '~$35-80',    'Hayden thermal fan clutch'],
+          ['FOUR SEASONS',     'Engine Cooling Fan Clutch',                          '~$38-85',    'Four Seasons fan clutch'],
+          ['OEM',              'OEM Fan Clutch Assembly',                            '~$55-130',   'OEM fan clutch'],
+        ]},
+        { n:'Heater Core', rows:[
+          ['SPECTRA PREMIUM',  'Heater Core',                                        '~$45-110',   'Spectra Premium heater core'],
+          ['OEM',              'OEM Heater Core',                                    '~$85-200',   'OEM heater core'],
+          ['DORMAN',           'Heater Core',                                        '~$50-120',   'Dorman heater core'],
+        ]},
+
+        /* ── Fuel System ─────────────────────────────────── */
+        { n:'Fuel Pump', rows:[
+          ['DELPHI',           'Electric Fuel Pump Module Assembly',                 '~$85-180',   'Delphi fuel pump module'],
+          ['AIRTEX',           'Electric Fuel Pump Module',                          '~$70-150',   'Airtex fuel pump'],
+          ['CARTER',           'Electric Fuel Pump; in-tank',                        '~$75-160',   'Carter electric fuel pump'],
+          ['OEM',              'OEM Fuel Pump Module Assembly',                      '~$140-280',  'OEM fuel pump module'],
+        ]},
+        { n:'Fuel Injectors', rows:[
+          ['BOSCH',            'Port Fuel Injector; each — search your engine type', '~$28-65 ea', 'Bosch fuel injector'],
+          ['DELPHI',           'Fuel Injector; each',                                '~$25-60 ea', 'Delphi fuel injector'],
+          ['MOTORCRAFT / OEM', 'OEM Fuel Injector; each',                            '~$55-150 ea','OEM fuel injector'],
+        ]},
+
+        /* ── Engine Sensors & Electronics ────────────────── */
+        { n:'Mass Air Flow (MAF) Sensor', rows:[
+          ['BOSCH',            'Original Equipment Mass Air Flow Sensor',             '~$65-140',   'Bosch MAF sensor'],
+          ['DELPHI',           'Mass Air Flow Sensor',                               '~$55-120',   'Delphi MAF sensor'],
+          ['DENSO',            'Mass Air Flow Sensor',                               '~$60-130',   'Denso MAF sensor'],
+          ['OEM',              'OEM Mass Air Flow Sensor',                           '~$90-220',   'OEM MAF sensor mass air flow'],
+        ]},
+        { n:'Oxygen (O2) Sensor', rows:[
+          ['BOSCH',            'OE Oxygen Sensor; Upstream or Downstream; each',     '~$28-65 ea', 'Bosch oxygen O2 sensor'],
+          ['DENSO',            'Oxygen Sensor; each',                                '~$32-70 ea', 'Denso O2 sensor'],
+          ['WALKER',           'Exhaust Gas Oxygen Sensor; each',                    '~$22-55 ea', 'Walker oxygen sensor'],
+          ['OEM',              'OEM Oxygen Sensor; each',                            '~$45-120 ea','OEM O2 sensor'],
+        ]},
+        { n:'Crankshaft Position Sensor', rows:[
+          ['STANDARD MOTOR',   'Crankshaft Position Sensor',                         '~$22-55',    'Standard Motor crankshaft position sensor'],
+          ['DELPHI',           'Crankshaft Position Sensor',                         '~$28-60',    'Delphi crankshaft position sensor'],
+          ['OEM',              'OEM Crankshaft Position Sensor',                     '~$45-100',   'OEM crankshaft position sensor'],
+        ]},
+        { n:'Camshaft Position Sensor', rows:[
+          ['STANDARD MOTOR',   'Camshaft Position Sensor',                           '~$22-55',    'Standard Motor camshaft position sensor'],
+          ['DELPHI',           'Camshaft Position Sensor',                           '~$28-62',    'Delphi camshaft position sensor'],
+          ['OEM',              'OEM Camshaft Position Sensor',                       '~$45-110',   'OEM camshaft position sensor'],
+        ]},
+        { n:'Throttle Position Sensor (TPS)', rows:[
+          ['STANDARD MOTOR',   'Throttle Position Sensor',                           '~$18-45',    'Standard Motor throttle position sensor TPS'],
+          ['DELPHI',           'Throttle Position Sensor',                           '~$20-50',    'Delphi throttle position sensor'],
+          ['OEM',              'OEM Throttle Position Sensor',                       '~$35-90',    'OEM throttle position sensor'],
+        ]},
+        { n:'Idle Air Control (IAC) Valve', rows:[
+          ['STANDARD MOTOR',   'Idle Air Control Valve',                             '~$25-65',    'Standard Motor idle air control valve IAC'],
+          ['DELPHI',           'Idle Air Control Valve',                             '~$28-70',    'Delphi idle air control valve'],
+          ['OEM',              'OEM Idle Air Control Valve',                         '~$45-120',   'OEM idle air control valve'],
+        ]},
+
+        /* ── Ignition ────────────────────────────────────── */
+        { n:'Ignition Coil', rows:[
+          ['BOSCH',            'OE Ignition Coil; each (qty depends on engine)',     '~$18-45 ea', 'Bosch ignition coil'],
+          ['DELPHI',           'Ignition Coil; each',                                '~$20-50 ea', 'Delphi ignition coil'],
+          ['STANDARD MOTOR',   'Ignition Coil; each',                                '~$22-55 ea', 'Standard Motor ignition coil'],
+          ['OEM',              'OEM Ignition Coil; each',                            '~$35-90 ea', 'OEM ignition coil'],
+        ]},
+
+        /* ── Engine Seals & Gaskets ──────────────────────── */
+        { n:'Valve Cover Gasket', rows:[
+          ['FELPRO',           'Valve Cover Gasket Set; Left or Right bank',         '~$14-40',    'Felpro valve cover gasket'],
+          ['VICTOR REINZ',     'Valve Cover Gasket Set',                             '~$18-45',    'Victor Reinz valve cover gasket'],
+          ['OEM',              'OEM Valve Cover Gasket',                             '~$22-65',    'OEM valve cover gasket'],
+        ]},
+        { n:'Intake Manifold Gasket', rows:[
+          ['FELPRO',           'Intake Manifold Gasket Set',                         '~$18-55',    'Felpro intake manifold gasket'],
+          ['VICTOR REINZ',     'Intake Manifold Gasket Set',                         '~$22-60',    'Victor Reinz intake manifold gasket'],
+          ['OEM',              'OEM Intake Manifold Gasket',                         '~$30-85',    'OEM intake manifold gasket'],
+        ]},
+        { n:'Head Gasket Set', rows:[
+          ['FELPRO',           'Head Gasket Set; includes all gaskets for one head', '~$45-120',   'Felpro head gasket set'],
+          ['VICTOR REINZ',     'Head Gasket Set',                                    '~$55-140',   'Victor Reinz head gasket set'],
+          ['OEM',              'OEM Head Gasket',                                    '~$80-220',   'OEM head gasket'],
+        ]},
+
+        /* ── Emissions & Exhaust ─────────────────────────── */
+        { n:'EGR Valve', rows:[
+          ['STANDARD MOTOR',   'EGR Valve',                                          '~$55-130',   'Standard Motor EGR valve'],
+          ['DELPHI',           'EGR Valve',                                          '~$60-140',   'Delphi EGR valve'],
+          ['DORMAN',           'EGR Valve',                                          '~$50-120',   'Dorman EGR valve'],
+          ['OEM',              'OEM EGR Valve',                                      '~$80-220',   'OEM EGR valve'],
+        ]},
+        { n:'Catalytic Converter', rows:[
+          ['EASTERN CATALYTIC','Direct-Fit Catalytic Converter',                     '~$80-220',   'Eastern catalytic converter direct fit'],
+          ['DORMAN',           'Catalytic Converter',                                '~$90-240',   'Dorman catalytic converter'],
+          ['WALKER',           'Ultra EPA Catalytic Converter',                      '~$85-230',   'Walker catalytic converter'],
+          ['OEM',              'OEM Catalytic Converter',                            '~$200-600',  'OEM catalytic converter'],
+        ]},
+        { n:'Exhaust Manifold Gasket', rows:[
+          ['FELPRO',           'Exhaust Manifold Gasket Set',                        '~$12-35',    'Felpro exhaust manifold gasket'],
+          ['VICTOR REINZ',     'Exhaust Manifold Gasket',                            '~$14-40',    'Victor Reinz exhaust manifold gasket'],
+          ['OEM',              'OEM Exhaust Manifold Gasket',                        '~$18-55',    'OEM exhaust manifold gasket'],
+        ]},
+
+        /* ── Brakes — Additional ─────────────────────────── */
+        { n:'Brake Caliper — Front', rows:[
+          ['RAYBESTOS',        'R-Line Brake Caliper; Front Left or Right; each',    '~$35-75 ea', 'Raybestos brake caliper front'],
+          ['CARDONE',          'Remanufactured Brake Caliper; Front; each',          '~$30-65 ea', 'Cardone brake caliper front'],
+          ['OEM',              'OEM Brake Caliper; Front; each',                     '~$65-180 ea','OEM brake caliper front'],
+          ['CENTRIC',          'Premium Brake Caliper; Front; each',                 '~$38-80 ea', 'Centric brake caliper front'],
+        ]},
+        { n:'Brake Caliper — Rear', rows:[
+          ['RAYBESTOS',        'R-Line Brake Caliper; Rear Left or Right; each',     '~$32-68 ea', 'Raybestos brake caliper rear'],
+          ['CARDONE',          'Remanufactured Brake Caliper; Rear; each',           '~$28-60 ea', 'Cardone brake caliper rear'],
+          ['CENTRIC',          'Premium Brake Caliper; Rear; each',                  '~$35-72 ea', 'Centric brake caliper rear'],
+        ]},
+        { n:'Brake Hose — Front', rows:[
+          ['RAYBESTOS',        'Brake Hydraulic Hose; Front Left or Right; each',    '~$14-30 ea', 'Raybestos brake hose front'],
+          ['DORMAN',           'Brake Hydraulic Hose; Front; each',                  '~$12-28 ea', 'Dorman brake hose front'],
+          ['GATES',            'Brake Hose; Front; each',                            '~$14-32 ea', 'Gates brake hose front'],
+        ]},
+
+        /* ── Steering ────────────────────────────────────── */
+        { n:'Ball Joint — Lower', rows:[
+          ['MOOG',             'Lower Ball Joint; Problem Solver; Front; each',      '~$32-70 ea', 'MOOG lower ball joint front'],
+          ['DELPHI',           'Lower Ball Joint; Front; each',                      '~$28-60 ea', 'Delphi lower ball joint front'],
+          ['DORMAN',           'Lower Ball Joint; Front; each',                      '~$22-50 ea', 'Dorman lower ball joint front'],
+        ]},
+        { n:'Sway Bar Link', rows:[
+          ['MOOG',             'Stabilizer Bar Link Kit; Front; each',               '~$18-45 ea', 'MOOG sway bar link front'],
+          ['DORMAN',           'Sway Bar Link; Front Left or Right; each',           '~$12-30 ea', 'Dorman sway bar link front'],
+          ['DELPHI',           'Sway Bar End Link; each',                            '~$14-35 ea', 'Delphi sway bar end link'],
+        ]},
+        { n:'Power Steering Pump', rows:[
+          ['CARDONE',          'Remanufactured Power Steering Pump; w/ Core',        '~$55-130',   'Cardone power steering pump'],
+          ['GATES',            'Power Steering Pump; Premium New',                   '~$80-180',   'Gates power steering pump'],
+          ['OEM',              'OEM Power Steering Pump',                            '~$120-280',  'OEM power steering pump'],
+        ]},
+        { n:'Power Steering Hose', rows:[
+          ['DORMAN',           'Power Steering Pressure Hose',                       '~$22-65',    'Dorman power steering pressure hose'],
+          ['GATES',            'Power Steering Return Hose',                         '~$14-38',    'Gates power steering hose'],
+          ['OEM',              'OEM Power Steering Hose',                            '~$35-95',    'OEM power steering hose'],
+        ]},
+
+        /* ── Transmission & Drivetrain ───────────────────── */
+        { n:'Transmission Filter & Pan Gasket', rows:[
+          ['MOTORCRAFT / OEM', 'OEM Transmission Service Kit; Filter + Gasket',      '~$18-55',    'OEM transmission filter pan gasket kit'],
+          ['FRAM',             'Transmission Filter Kit; w/ Gasket',                 '~$12-28',    'FRAM transmission filter kit'],
+          ['WIX',              'Automatic Transmission Filter Kit',                  '~$14-32',    'WIX transmission filter kit'],
+          ['PUROLATOR',        'Automatic Transmission Filter Kit',                  '~$12-28',    'Purolator transmission filter kit'],
+        ]},
+        { n:'Transmission Mount', rows:[
+          ['ANCHOR',           'Transmission Mount',                                 '~$22-65',    'Anchor transmission mount'],
+          ['PIONEER',          'Transmission Mount',                                 '~$18-55',    'Pioneer transmission mount'],
+          ['DORMAN',           'Automatic Transmission Mount',                       '~$20-58',    'Dorman transmission mount'],
+          ['OEM',              'OEM Transmission Mount',                             '~$45-120',   'OEM transmission mount'],
+        ]},
+        { n:'Engine Mount', rows:[
+          ['ANCHOR',           'Engine Mount; Left or Right; each',                  '~$22-65 ea', 'Anchor engine mount'],
+          ['PIONEER',          'Engine Mount; each',                                 '~$20-58 ea', 'Pioneer engine mount'],
+          ['DORMAN',           'Engine Mount; each',                                 '~$24-65 ea', 'Dorman engine mount'],
+          ['OEM',              'OEM Engine Mount; each',                             '~$45-130 ea','OEM engine mount'],
+        ]},
+        { n:'U-Joint / Universal Joint', rows:[
+          ['MOOG',             'Universal Joint; Driveshaft; each',                  '~$18-45 ea', 'MOOG universal joint U-joint driveshaft'],
+          ['SPICER',           'Original Design U-Joint; each',                      '~$20-55 ea', 'Spicer U-joint universal joint'],
+          ['OEM',              'OEM Universal Joint; each',                          '~$28-75 ea', 'OEM U-joint universal joint'],
+        ]},
+
+        /* ── Body & Exterior ─────────────────────────────── */
+        { n:'Side Mirror — Driver (Left)', rows:[
+          ['DORMAN',           'Door Mirror; Power; Left (Driver) Side',             '~$35-120',   'Dorman driver side mirror power'],
+          ['K-SOURCE',         'Door Mirror; Left (Driver) Side',                    '~$28-90',    'K-Source driver side mirror'],
+          ['OEM',              'OEM Driver Side Mirror Assembly',                    '~$85-280',   'OEM driver side door mirror left'],
+        ]},
+        { n:'Side Mirror — Passenger (Right)', rows:[
+          ['DORMAN',           'Door Mirror; Power; Right (Passenger) Side',         '~$30-110',   'Dorman passenger side mirror power'],
+          ['K-SOURCE',         'Door Mirror; Right (Passenger) Side',                '~$25-85',    'K-Source passenger side mirror'],
+          ['OEM',              'OEM Passenger Side Mirror Assembly',                 '~$80-260',   'OEM passenger side door mirror right'],
+        ]},
+        { n:'Front Bumper Cover / Reinforcement', rows:[
+          ['DORMAN',           'Front Bumper Reinforcement',                         '~$45-130',   'Dorman front bumper reinforcement'],
+          ['OEM',              'OEM Front Bumper Cover or Reinforcement',            '~$80-350',   'OEM front bumper cover reinforcement'],
+          ['REPLACE',          'Front Bumper Cover; CAPA Certified',                 '~$60-200',   'front bumper cover CAPA certified'],
+        ]},
+        { n:'Headlight Assembly', rows:[
+          ['TYC',              'Replacement Headlight Assembly; Left or Right; each','~$45-130 ea','TYC headlight assembly'],
+          ['DEPO',             'Headlight Assembly; Left or Right; each',            '~$40-120 ea','DEPO headlight assembly'],
+          ['DORMAN',           'Headlight Assembly; each',                           '~$55-140 ea','Dorman headlight assembly'],
+          ['OEM',              'OEM Headlight Assembly; each',                       '~$100-400 ea','OEM headlight assembly'],
+        ]},
+        { n:'Tail Light Assembly', rows:[
+          ['TYC',              'Replacement Tail Light Assembly; Left or Right; each','~$30-90 ea','TYC tail light assembly'],
+          ['DEPO',             'Tail Light Assembly; Left or Right; each',           '~$28-85 ea', 'DEPO tail light assembly'],
+          ['DORMAN',           'Tail Light Assembly; each',                          '~$35-100 ea','Dorman tail light assembly'],
+          ['OEM',              'OEM Tail Light Assembly; each',                      '~$80-300 ea','OEM tail light assembly'],
+        ]},
+        { n:'Door Handle — Exterior', rows:[
+          ['DORMAN',           'Exterior Door Handle; Front or Rear; Left or Right', '~$12-35',    'Dorman exterior door handle'],
+          ['OEM',              'OEM Exterior Door Handle',                           '~$25-80',    'OEM exterior door handle'],
+          ['REPLACE',          'Exterior Door Handle; CAPA Certified',               '~$15-40',    'exterior door handle replacement'],
+        ]},
+        { n:'Door Handle — Interior', rows:[
+          ['DORMAN',           'Interior Door Handle; Front or Rear; Left or Right', '~$10-30',    'Dorman interior door handle'],
+          ['OEM',              'OEM Interior Door Handle',                           '~$18-60',    'OEM interior door handle'],
+        ]},
+        { n:'Door Lock Actuator', rows:[
+          ['DORMAN',           'Door Lock Actuator Motor; Front or Rear; each',      '~$18-55 ea', 'Dorman door lock actuator'],
+          ['AC DELCO / OEM',   'Door Lock Actuator; each',                           '~$25-85 ea', 'OEM door lock actuator motor'],
+          ['STANDARD MOTOR',   'Power Door Lock Actuator; each',                     '~$20-60 ea', 'Standard Motor door lock actuator'],
+        ]},
+        { n:'Grille Assembly', rows:[
+          ['DORMAN',           'Grille Assembly; includes all hardware',             '~$45-160',   'Dorman grille assembly'],
+          ['OEM',              'OEM Grille Assembly',                                '~$80-350',   'OEM grille assembly'],
+          ['REPLACE',          'Grille Assembly; CAPA Certified',                    '~$50-180',   'grille assembly replacement'],
+        ]},
+        { n:'Hood Latch / Release Cable', rows:[
+          ['DORMAN',           'Hood Latch Assembly',                                '~$14-40',    'Dorman hood latch'],
+          ['OEM',              'OEM Hood Latch Assembly',                            '~$22-65',    'OEM hood latch assembly'],
+          ['DORMAN',           'Hood Release Cable',                                 '~$12-30',    'Dorman hood release cable'],
+        ]},
+
+        /* ── HVAC / Air Conditioning ─────────────────────── */
+        { n:'AC Compressor', rows:[
+          ['FOUR SEASONS',     'New A/C Compressor w/ Clutch',                       '~$130-280',  'Four Seasons AC compressor with clutch'],
+          ['DENSO',            'New A/C Compressor',                                 '~$150-320',  'Denso AC compressor'],
+          ['OEM',              'OEM A/C Compressor Assembly',                        '~$220-550',  'OEM AC compressor'],
+        ]},
+        { n:'AC Condenser', rows:[
+          ['FOUR SEASONS',     'A/C Condenser',                                      '~$65-160',   'Four Seasons AC condenser'],
+          ['SPECTRA PREMIUM',  'A/C Condenser',                                      '~$60-150',   'Spectra Premium AC condenser'],
+          ['OEM',              'OEM A/C Condenser',                                  '~$100-280',  'OEM AC condenser'],
+        ]},
+        { n:'Blower Motor', rows:[
+          ['FOUR SEASONS',     'HVAC Blower Motor',                                  '~$35-90',    'Four Seasons HVAC blower motor'],
+          ['TYC',              'HVAC Blower Motor',                                  '~$30-80',    'TYC blower motor'],
+          ['OEM',              'OEM HVAC Blower Motor',                              '~$55-160',   'OEM blower motor HVAC'],
+        ]},
+        { n:'Blower Motor Resistor', rows:[
+          ['DORMAN',           'HVAC Blower Motor Resistor',                         '~$12-35',    'Dorman blower motor resistor'],
+          ['STANDARD MOTOR',   'Blower Motor Resistor',                              '~$14-40',    'Standard Motor blower motor resistor'],
+          ['OEM',              'OEM Blower Motor Resistor',                          '~$20-65',    'OEM blower motor resistor'],
+        ]},
+
+        /* ── Windshield / Wiper System ───────────────────── */
+        { n:'Wiper Motor', rows:[
+          ['DORMAN',           'Windshield Wiper Motor; Front',                      '~$45-120',   'Dorman windshield wiper motor front'],
+          ['CARDONE',          'Remanufactured Wiper Motor; Front',                  '~$38-100',   'Cardone wiper motor front'],
+          ['OEM',              'OEM Windshield Wiper Motor',                         '~$80-220',   'OEM windshield wiper motor'],
+        ]},
+        { n:'Window Regulator', rows:[
+          ['DORMAN',           'Window Regulator w/ Motor; Front Left or Right',     '~$45-130 ea','Dorman window regulator with motor'],
+          ['CARDONE',          'Window Regulator w/ Motor; each',                    '~$40-120 ea','Cardone window regulator with motor'],
+          ['OEM',              'OEM Window Regulator Assembly',                      '~$80-250 ea','OEM window regulator motor'],
         ]},
         { n:'Battery', rows:[
           ['DURALAST',         'Duralast Battery — look up group size for your vehicle', '~$100-180', 'car battery group size'],
