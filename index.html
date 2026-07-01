@@ -805,7 +805,7 @@
 
         /* ── 1. Ford 6.0L Power Stroke Diesel 2003-2010 ─────── */
         { id:'ford_ps60', label:'Ford 6.0L Power Stroke Diesel',
-          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && fu.includes('Diesel') && di.startsWith('6.0'),
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='FORD' && isDiesel && dispIs('6.0'),
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -942,7 +942,7 @@
 
         /* ── Ford 7.3L Power Stroke Diesel (F/E-250/350/450 1994-2003) */
         { id:'ford_ps73', label:'Ford 7.3L Power Stroke Diesel',
-          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && fu.includes('Diesel') && di.startsWith('7.3'),
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='FORD' && isDiesel && dispIs('7.3'),
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1047,7 +1047,7 @@
 
         /* ── Ford 6.4L Power Stroke Diesel (F-250/350/450 2008-2010) */
         { id:'ford_ps64', label:'Ford 6.4L Power Stroke Diesel',
-          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && fu.includes('Diesel') && di.startsWith('6.4'),
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='FORD' && isDiesel && dispIs('6.4'),
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1135,7 +1135,7 @@
 
         /* ── Ford 6.7L Power Stroke Diesel (F-250/350/450 2011+) */
         { id:'ford_ps67', label:'Ford 6.7L Power Stroke Diesel (Scorpion)',
-          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && fu.includes('Diesel') && di.startsWith('6.7'),
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='FORD' && isDiesel && dispIs('6.7'),
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1238,7 +1238,7 @@
 
         /* ── Ford 6.8L V10 Triton (F-250/350/E-350 1999-2016) */
         { id:'ford_v10_68', label:'Ford 6.8L V10 Triton',
-          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && !fu.includes('Diesel') && (di.startsWith('6.8')||cy==='10'),
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='FORD' && isGas && (dispIs('6.8') || cy==='10'),
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1337,7 +1337,7 @@
 
         /* ── Ford 6.2L V8 Boss (F-250/350/450, E-350 2011+) */
         { id:'ford_62_boss', label:'Ford 6.2L V8 Boss',
-          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && !fu.includes('Diesel') && di.startsWith('6.2') && yr>=2011,
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='FORD' && isGas && dispIs('6.2') && yr>=2011,
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1417,7 +1417,7 @@
 
         /* ── Ford Transit 3.5L EcoBoost V6 (2015+) */
         { id:'ford_transit_eb', label:'Ford Transit 3.5L EcoBoost V6',
-          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && mo.includes('TRANSIT') && !fu.includes('Diesel') && di.startsWith('3.5'),
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='FORD' && mo.includes('TRANSIT') && isGas && dispIs('3.5'),
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1487,7 +1487,7 @@
 
         /* ── GM Savana / Express / Kodiak 6.0L V8 Gas (2001+) */
         { id:'gm_express_60', label:'GM Express/Savana 6.0L V8',
-          match:(mk,yr,mo,di,cy,fu) => ['CHEVROLET','GMC'].includes(mk) && !fu.includes('Diesel') && di.startsWith('6.0') && cy==='8',
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => ['CHEVROLET','GMC'].includes(mk) && isGas && dispIs('6.0') && cy==='8',
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1592,7 +1592,7 @@
 
         /* ── 2. Ford 5.4L V8 Triton 3-Valve 2004-2014 ───────── */
         { id:'ford_54_3v', label:'Ford 5.4L V8 Triton (3-Valve)',
-          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && !fu.includes('Diesel') && di.startsWith('5.4') && yr>=2004 && yr<=2014,
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='FORD' && isGas && dispIs('5.4') && yr>=2004 && yr<=2014,
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1697,7 +1697,7 @@
 
         /* ── 3. GM 5.3L V8 LS Gen IV (Silverado/Tahoe 2007-13) ─ */
         { id:'gm_53_lsiv', label:'GM 5.3L V8 LS Gen IV',
-          match:(mk,yr,mo,di,cy,fu) => ['CHEVROLET','GMC'].includes(mk) && !fu.includes('Diesel') && di.startsWith('5.3') && yr>=2007 && yr<=2013,
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => ['CHEVROLET','GMC'].includes(mk) && isGas && dispIs('5.3') && yr>=2007 && yr<=2013,
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1797,7 +1797,7 @@
 
         /* ── 4. Toyota 3.5L V6 2GR-FE (Camry/Highlander 2007+) ─ */
         { id:'toyota_2gr', label:'Toyota 3.5L V6 2GR-FE',
-          match:(mk,yr,mo,di,cy,fu) => mk==='TOYOTA' && di.startsWith('3.5') && cy==='6',
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='TOYOTA' && dispIs('3.5') && cy==='6',
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1884,7 +1884,7 @@
 
         /* ── 5. Honda 2.4L I4 K24 (Accord/CR-V 2003-2012) ───── */
         { id:'honda_k24', label:'Honda 2.4L I4 K24',
-          match:(mk,yr,mo,di,cy,fu) => mk==='HONDA' && di.startsWith('2.4') && cy==='4',
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='HONDA' && dispIs('2.4') && cy==='4',
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -1969,7 +1969,7 @@
 
         /* ── 6. Ram 5.7L HEMI V8 (Ram 1500/2500 2009+) ──────── */
         { id:'ram_57_hemi', label:'Ram 5.7L HEMI V8',
-          match:(mk,yr,mo,di,cy,fu) => mk==='RAM' && !fu.includes('Diesel') && di.startsWith('5.7') && yr>=2009,
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='RAM' && isGas && dispIs('5.7') && yr>=2009,
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -2059,7 +2059,7 @@
 
         /* ── 7. Ford 4.6L V8 Modular (Expedition/F-150/Crown Vic 1997-2014) */
         { id:'ford_46_v8', label:'Ford 4.6L V8 Modular',
-          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && !fu.includes('Diesel') && (di==='4.6'||di.startsWith('4.6')) && cy==='8',
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='FORD' && isGas && dispIs('4.6') && cy==='8',
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -2218,7 +2218,7 @@
 
         /* ── 8. Toyota Corolla/Matrix 1.8L 2ZR-FE (2009-2019) ── */
         { id:'toyota_2zr', label:'Toyota 1.8L I4 2ZR-FE',
-          match:(mk,yr,mo,di,cy,fu) => mk==='TOYOTA' && di.startsWith('1.8') && cy==='4' && yr>=2009,
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => mk==='TOYOTA' && dispIs('1.8') && cy==='4' && yr>=2009,
           cats:{
             'Oil Filter':{
               Economy:[_p('FRAM','PH10575','Extra Guard Spin-On','$5.49')],
@@ -2283,7 +2283,7 @@
 
         /* ── 9. Jeep Wrangler 3.6L Pentastar V6 (2012+) ──────── */
         { id:'jeep_36_pent', label:'Jeep 3.6L Pentastar V6',
-          match:(mk,yr,mo,di,cy,fu) => ['JEEP','DODGE','CHRYSLER','RAM'].includes(mk) && di.startsWith('3.6') && cy==='6' && yr>=2011,
+          match:(mk,yr,mo,di,cy,fu,isDiesel,isGas,dispIs) => ['JEEP','DODGE','CHRYSLER','RAM'].includes(mk) && dispIs('3.6') && cy==='6' && yr>=2011,
           cats:{
             'Belt Drive':{
               'Serpentine Belt':{
@@ -2361,15 +2361,28 @@
       ],
 
       find(make, year, model, disp, cyl, fuel) {
-        const mk  = String(make || '').toUpperCase().trim();
+        const mk  = String(make  || '').toUpperCase().trim();
         const yr  = parseInt(year) || 0;
-        const mo  = String(model || '').toUpperCase();
-        const di  = String(disp  || '').replace(/L$/i,'').trim();
+        const mo  = String(model || '').toUpperCase().trim();
+        const fu  = String(fuel  || '').toLowerCase().trim();
+        const di  = String(disp  || '').toLowerCase().replace(/[^0-9.]/g,'').trim(); // "6.0L" → "6.0"
         const cy  = String(cyl   || '').trim();
-        const fu  = String(fuel  || '').trim();
+
+        // Normalize fuel: blank/gasoline/flex fuel treated as gas; anything diesel-related = diesel
+        const isDiesel = fu.includes('diesel') || fu.includes('cng') === false && (
+          // Year/model-based diesel inference for common fleet vehicles when NHTSA leaves fuel blank
+          mk === 'FORD' && ['E-350','E-450','F-250','F-350','F-450','F-550'].some(m => mo.includes(m.replace('-','')))
+          && yr >= 1994 && false // don't infer diesel without explicit signal — too risky
+        );
+        const isGas = !isDiesel;
+
+        // Helper: displacement starts-with allowing "6" to match "6.0", "6.4", etc only if exact
+        const dispIs = (prefix) => di === prefix || di.startsWith(prefix + '.') || di.startsWith(prefix);
+
         for (const pl of this.platforms) {
-          try { if (pl.match(mk, yr, mo, di, cy, fu)) return pl; }
-          catch {}
+          try {
+            if (pl.match(mk, yr, mo, di, cy, fu, isDiesel, isGas, dispIs)) return pl;
+          } catch {}
         }
         return null;
       }
@@ -2565,16 +2578,15 @@
     }
 
     // ─── Parts lookup & render ─────────────────────────────────
-    function fetchAndRenderParts(year, make, model, engine) {
-      const loading  = $('aiPartsLoading');
-      const content  = $('aiPartsContent');
+    function fetchAndRenderParts(year, make, model, rawDisp, rawCyl, rawFuel) {
+      const loading = $('aiPartsLoading');
+      const content = $('aiPartsContent');
       loading.style.display = 'none';
       content.innerHTML = '';
 
-      const veh   = window.__currentVehicle || {};
-      const disp  = veh['Displacement (L)']  || veh['Engine'] || '';
-      const cyl   = veh['Engine Number of Cylinders'] || '';
-      const fuel  = veh['Fuel Type - Primary'] || veh['Fuel'] || '';
+      const disp = String(rawDisp || '').trim();
+      const cyl  = String(rawCyl  || '').trim();
+      const fuel = String(rawFuel || '').trim();
 
       const platform = VP.find(make, year, model, disp, cyl, fuel);
       const badge = document.createElement('div');
@@ -2645,24 +2657,31 @@
 
 
     function renderVehicle(results, vin) {
-      const year = getDecodedValue(results, 'Model Year');
-      const make = getDecodedValue(results, 'Make');
-      const model = getDecodedValue(results, 'Model');
-      const trim = getDecodedValue(results, 'Trim');
-      const engine = getDecodedValue(results, 'Engine Model') || getDecodedValue(results, 'Displacement (L)') || getDecodedValue(results, 'Engine Number of Cylinders');
-      const fuel = getDecodedValue(results, 'Fuel Type - Primary');
-      const body = getDecodedValue(results, 'Body Class');
-      const drive = getDecodedValue(results, 'Drive Type');
-      const trans = getDecodedValue(results, 'Transmission Style');
-      const transSpeeds = getDecodedValue(results, 'Transmission Speeds');
-      const wheelBase = getDecodedValue(results, 'Wheel Base (inches)');
-      const gvwr = getDecodedValue(results, 'GVWR');
-      const brake = getDecodedValue(results, 'Brake System Type');
-      const vehicleType = getDecodedValue(results, 'Vehicle Type');
+      const year   = getDecodedValue(results, 'Model Year');
+      const make   = getDecodedValue(results, 'Make');
+      const model  = getDecodedValue(results, 'Model');
+      const trim   = getDecodedValue(results, 'Trim');
       const series = getDecodedValue(results, 'Series');
+
+      // Raw engine values — kept separate so VP.find() gets clean numbers
+      const rawDisp = getDecodedValue(results, 'Displacement (L)');
+      const rawCyl  = getDecodedValue(results, 'Engine Number of Cylinders');
+      const rawFuel = getDecodedValue(results, 'Fuel Type - Primary');
+
+      // Display-only engine string
+      const engine       = getDecodedValue(results, 'Engine Model') || rawDisp || rawCyl;
+      const fuel         = rawFuel;
+      const body         = getDecodedValue(results, 'Body Class');
+      const drive        = getDecodedValue(results, 'Drive Type');
+      const trans        = getDecodedValue(results, 'Transmission Style');
+      const transSpeeds  = getDecodedValue(results, 'Transmission Speeds');
+      const wheelBase    = getDecodedValue(results, 'Wheel Base (inches)');
+      const gvwr         = getDecodedValue(results, 'GVWR');
+      const brake        = getDecodedValue(results, 'Brake System Type');
+      const vehicleType  = getDecodedValue(results, 'Vehicle Type');
       const engineConfig = getDecodedValue(results, 'Engine Configuration');
-      const valveTrain = getDecodedValue(results, 'Valve Train Design');
-      const turbo = getDecodedValue(results, 'Turbo');
+      const valveTrain   = getDecodedValue(results, 'Valve Train Design');
+      const turbo        = getDecodedValue(results, 'Turbo');
 
       const title = [year, make, model].filter(Boolean).join(' ');
       $('vehicleName').textContent = title || 'Decoded Vehicle';
@@ -2687,7 +2706,7 @@
       window.__currentVehicle = tableData;
 
       renderSpecTable(results);
-      fetchAndRenderParts(year, make, model, engine);
+      fetchAndRenderParts(year, make, model, rawDisp, rawCyl, rawFuel);
 
       const resultsBox = $('results');
       resultsBox.style.display = 'block';
