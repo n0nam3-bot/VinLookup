@@ -938,6 +938,658 @@
           }
         },
 
+        },
+
+        /* ── Ford 7.3L Power Stroke Diesel (F/E-250/350/450 1994-2003) */
+        { id:'ford_ps73', label:'Ford 7.3L Power Stroke Diesel',
+          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && fu.includes('Diesel') && di.startsWith('7.3'),
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK6PK2080','Serpentine Belt; 6-Rib','$13.99')],
+                'Standard Replacement':[
+                  _p('GATES','K060830','Micro-V Serpentine Belt; w/ A/C','$17.99'),
+                  _p('DAYCO','5060830','Serpentine Belt; w/ A/C','$16.99'),
+                  _p('CONTINENTAL','4060830','Multi V-Belt; 6-Rib','$18.99'),
+                ],
+                'Heavy Duty':[_p('GATES','K060830HD','FleetRunner Heavy Duty; 6-Rib','$26.99')]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-227','Belt Tensioner','$32.99')],
+                'Standard Replacement':[
+                  _p('GATES','38432','DriveAlign Automatic Belt Tensioner','$48.99'),
+                  _p('DAYCO','89313','Automatic Belt Tensioner','$46.99'),
+                  _p('MOTORCRAFT','BT70','Drive Belt Tensioner','$69.99'),
+                ]
+              },
+              'Idler Pulley':{
+                Economy:[_p('DORMAN','419-212','Belt Idler Pulley','$19.99')],
+                'Standard Replacement':[
+                  _p('GATES','36492','Smooth Idler Pulley; Accessory Drive','$28.99'),
+                  _p('MOTORCRAFT','YS292','Drive Belt Idler Pulley','$29.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH3614','Extra Guard Spin-On Oil Filter','$5.49')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FL-820S','OEM Oil Filter; 7.3L','$9.99'),
+                _p('WIX','51069','Spin-On Oil Filter','$7.99'),
+                _p('PUROLATOR','PL14459','PureONE Oil Filter','$8.49'),
+              ],
+              Premium:[
+                _p('MOBIL 1','M1-212','Extended Performance Oil Filter','$12.99'),
+                _p('K&N','HP-7018','High Performance Gold Oil Filter','$13.99'),
+              ]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA10163','Extra Guard Air Filter','$13.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FA-1817','OEM Air Filter; 7.3L','$22.99'),
+                _p('WIX','42374','Air Filter','$16.99'),
+              ],
+              Premium:[_p('K&N','33-2171','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Fuel Filter':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FD-4595','Primary Fuel Filter; 7.3L PS; Spin-On','$18.99'),
+                _p('MOTORCRAFT','FD-4596','Secondary Fuel/Water Sep; 7.3L PS','$22.99'),
+                _p('WIX','33666','Primary Fuel Filter; 7.3L PS','$16.99'),
+                _p('FLEETGUARD','FS1251','Fuel/Water Separator; 7.3L PS','$19.99'),
+              ]
+            },
+            'Glow Plugs':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','ZD-11','Upgraded Pencil Glow Plug; 7.3L PS; each — replace relay too','$12.99 ea'),
+                _p('BOSCH','0250201032','Glow Plug; 7.3L PS; each','$10.99 ea'),
+                _p('NGK','Y-717J','Glow Plug; 7.3L PS; each','$9.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','SGD757C','Service Grade Disc Brake Pad; Front','$28.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BR-1530A','Disc Brake Pad Set; Front','$44.99'),
+                _p('AKEBONO','EUR757','EURO Ultra-Premium Ceramic; Front','$52.99'),
+                _p('POWER STOP','Z23-757','Z23 Evolution Sport; Front','$48.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','9880R','R-Line Disc Brake Rotor; Front','$32.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BRCF19','Brake Rotor; Front','$54.99'),
+                _p('CENTRIC','120.65114','Premium Brake Rotor; Front','$39.99'),
+                _p('POWER STOP','AR8596','Evolution Coated Rotor; Front','$44.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','PW-406','Engine Water Pump; 7.3L PS','$84.99'),
+                _p('GATES','43034','Premium Water Pump; 7.3L PS','$74.99'),
+                _p('DAYCO','DP905','Engine Water Pump','$69.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BXT65-750','Battery; Group 65; 750 CCA','$169.99'),
+                _p('MOTORCRAFT','BXT78-850','Battery; Group 78; 850 CCA (Dual Battery)','$179.99'),
+                _p('DURALAST','65-DL','Group 65; 750 CCA','$139.99'),
+                _p('OPTIMA','8014-045','YellowTop Dual Purpose; 620 CCA','$249.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','WW-2118','Wiper Blade Set; 21in/18in','$24.99'),
+                _p('BOSCH','4826','ICON Beam; 26in Driver','$18.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── Ford 6.4L Power Stroke Diesel (F-250/350/450 2008-2010) */
+        { id:'ford_ps64', label:'Ford 6.4L Power Stroke Diesel',
+          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && fu.includes('Diesel') && di.startsWith('6.4'),
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK6PK2025','Serpentine Belt; 6-Rib','$13.99')],
+                'Standard Replacement':[
+                  _p('GATES','K060936','Micro-V Serpentine Belt; 6.4L','$18.99'),
+                  _p('DAYCO','5060936','Serpentine Belt','$17.49'),
+                  _p('CONTINENTAL','4060936','Multi V-Belt; 6-Rib','$19.49'),
+                ],
+                'Heavy Duty':[_p('GATES','K060936HD','FleetRunner Heavy Duty; 6-Rib','$28.99')]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-227','Belt Tensioner','$34.99')],
+                'Standard Replacement':[
+                  _p('GATES','38479','DriveAlign Automatic Belt Tensioner','$52.99'),
+                  _p('DAYCO','89560','Automatic Belt Tensioner','$48.99'),
+                  _p('MOTORCRAFT','BT155','Drive Belt Tensioner','$74.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH9579','Extra Guard Spin-On Oil Filter','$5.49')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FL-2016','OEM Oil Filter; 6.4L PS','$8.99'),
+                _p('WIX','57502XP','XP Spin-On Oil Filter','$9.49'),
+                _p('PUROLATOR','PL10158','PureONE Oil Filter','$8.99'),
+              ],
+              Premium:[_p('MOBIL 1','M1-108A','Extended Performance Oil Filter','$12.99')]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA10355','Extra Guard Air Filter','$14.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FA-1907','OEM Air Filter; 6.4L PS','$24.99'),
+                _p('WIX','42736','Air Filter','$18.99'),
+              ],
+              Premium:[_p('K&N','33-2296','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Fuel Filter':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FD-4622','Primary Fuel Filter; 6.4L PS','$24.99'),
+                _p('MOTORCRAFT','FD-4623','Secondary Fuel Filter; 6.4L PS','$26.99'),
+                _p('WIX','33820','Primary Fuel Filter; 6.4L PS','$19.99'),
+                _p('FLEETGUARD','FF5458','Secondary Fuel Filter; 6.4L PS','$22.99'),
+              ]
+            },
+            'Glow Plugs':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','ZD-12','Glow Plug; 6.4L PS; each (set of 8)','$14.99 ea'),
+                _p('BOSCH','0250202132','Glow Plug; 6.4L PS; each','$12.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BR-1530A','Disc Brake Pad Set; Front','$44.99'),
+                _p('AKEBONO','EUR757','EURO Ultra-Premium Ceramic; Front','$52.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BRCF19','Brake Rotor; Front','$54.99'),
+                _p('CENTRIC','120.65114','Premium Brake Rotor; Front','$39.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','PW-530','Engine Water Pump; 6.4L PS','$94.99'),
+                _p('GATES','42545E','Premium Water Pump','$84.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BXT65-750','Battery; Group 65; 750 CCA','$169.99'),
+                _p('DURALAST','65-DL','Group 65; 750 CCA','$139.99'),
+                _p('OPTIMA','8014-045','YellowTop; 620 CCA','$249.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','WW-2118','Wiper Blade Set; 21in/18in','$24.99'),
+                _p('BOSCH','4826','ICON Beam; 26in Driver','$18.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── Ford 6.7L Power Stroke Diesel (F-250/350/450 2011+) */
+        { id:'ford_ps67', label:'Ford 6.7L Power Stroke Diesel (Scorpion)',
+          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && fu.includes('Diesel') && di.startsWith('6.7'),
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK6PK2120','Serpentine Belt; 6-Rib','$14.99')],
+                'Standard Replacement':[
+                  _p('GATES','K060936','Micro-V Serpentine Belt; 6.7L','$18.99'),
+                  _p('DAYCO','5060936','Serpentine Belt','$17.49'),
+                  _p('CONTINENTAL','4060936','Multi V-Belt; 6-Rib','$19.49'),
+                ],
+                'Heavy Duty':[_p('GATES','K060936HD','FleetRunner Heavy Duty','$28.99')]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-233','Belt Tensioner','$34.99')],
+                'Standard Replacement':[
+                  _p('GATES','38510','DriveAlign Automatic Belt Tensioner','$52.99'),
+                  _p('DAYCO','89619','Automatic Belt Tensioner','$48.99'),
+                  _p('MOTORCRAFT','BT155','Drive Belt Tensioner; 6.7L','$74.99'),
+                ]
+              },
+              'Idler Pulley':{
+                'Standard Replacement':[
+                  _p('GATES','36310','Smooth Idler Pulley','$28.99'),
+                  _p('DORMAN','419-501','Belt Idler Pulley','$19.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH9579','Extra Guard Spin-On Oil Filter','$5.49')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FL-2051S','OEM Oil Filter; 6.7L Scorpion','$11.99'),
+                _p('WIX','57060XP','XP Spin-On Oil Filter; 6.7L','$10.99'),
+                _p('PUROLATOR','PL10241','PureONE Oil Filter; 6.7L','$9.99'),
+              ],
+              Premium:[
+                _p('MOBIL 1','M1-108A','Extended Performance Oil Filter','$12.99'),
+                _p('K&N','HP-7040','High Performance Gold Oil Filter; 6.7L','$14.99'),
+              ]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA10553','Extra Guard Air Filter','$15.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FA-1923','OEM Air Filter; 6.7L PS','$26.99'),
+                _p('WIX','42833','Air Filter','$20.99'),
+              ],
+              Premium:[_p('K&N','33-2296','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Fuel Filter':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FD-4627','Primary Fuel Filter; 6.7L (2011-2016)','$24.99'),
+                _p('MOTORCRAFT','FD-4632','Secondary Fuel Filter; 6.7L (2011-2016)','$26.99'),
+                _p('WIX','33820','Primary Fuel Filter; 6.7L PS','$19.99'),
+                _p('FLEETGUARD','FF5458','Secondary Fuel Filter; 6.7L PS','$22.99'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','SGD757C','Service Grade Disc Brake Pad; Front','$28.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BR-1530A','Disc Brake Pad Set; Front','$44.99'),
+                _p('AKEBONO','EUR757','EURO Ultra-Premium Ceramic; Front','$52.99'),
+                _p('POWER STOP','Z23-757','Z23 Evolution Sport; Front','$48.99'),
+              ]
+            },
+            'Brake Pads (Rear)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BR-1531A','Disc Brake Pad Set; Rear','$38.99'),
+                _p('AKEBONO','EUR1081','EURO Ultra-Premium Ceramic; Rear','$48.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','9880R','R-Line Disc Brake Rotor; Front','$32.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BRCF19','Brake Rotor; Front','$54.99'),
+                _p('CENTRIC','120.65114','Premium Brake Rotor; Front','$39.99'),
+                _p('POWER STOP','AR8596','Evolution Coated Rotor; Front','$44.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','PW-548','Engine Water Pump; 6.7L PS','$94.99'),
+                _p('GATES','42612E','Premium Water Pump; 6.7L','$84.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BXT65-750','Battery; Group 65; 750 CCA','$169.99'),
+                _p('MOTORCRAFT','BXT78-850','Battery; Group 78; 850 CCA','$179.99'),
+                _p('DURALAST','65-DL','Group 65; 750 CCA','$139.99'),
+                _p('OPTIMA','8014-045','YellowTop Dual Purpose; 620 CCA','$249.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','WW-2118','Wiper Blade Set; 21in/18in','$24.99'),
+                _p('BOSCH','4826','ICON Beam; 26in Driver','$18.99'),
+                _p('TRICO','55-210','Steel Beam; 21in','$9.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── Ford 6.8L V10 Triton (F-250/350/E-350 1999-2016) */
+        { id:'ford_v10_68', label:'Ford 6.8L V10 Triton',
+          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && !fu.includes('Diesel') && (di.startsWith('6.8')||cy==='10'),
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK6PK2110','Serpentine Belt; 6-Rib','$13.99')],
+                'Standard Replacement':[
+                  _p('GATES','K060888','Micro-V Serpentine Belt; 6.8L V10','$17.99'),
+                  _p('DAYCO','5060888','Serpentine Belt','$16.99'),
+                  _p('CONTINENTAL','4060888','Multi V-Belt; 6-Rib','$18.49'),
+                ],
+                'Heavy Duty':[_p('GATES','K060888HD','FleetRunner Heavy Duty; 6-Rib','$26.99')]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-233','Belt Tensioner','$32.99')],
+                'Standard Replacement':[
+                  _p('GATES','38486','DriveAlign Automatic Belt Tensioner','$49.99'),
+                  _p('DAYCO','89560','Automatic Belt Tensioner','$45.99'),
+                  _p('MOTORCRAFT','BT70','Drive Belt Tensioner','$69.99'),
+                ]
+              },
+              'Idler Pulley':{
+                Economy:[_p('DORMAN','419-215','Belt Idler Pulley','$18.99')],
+                'Standard Replacement':[
+                  _p('GATES','36329','Smooth Idler Pulley','$28.99'),
+                  _p('MOTORCRAFT','YS295','Drive Belt Idler Pulley','$29.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH3614','Extra Guard Spin-On Oil Filter','$5.49')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FL-820S','OEM Oil Filter; 6.8L V10','$9.99'),
+                _p('WIX','51069','Spin-On Oil Filter','$7.99'),
+                _p('PUROLATOR','PL14459','PureONE Oil Filter','$8.49'),
+              ],
+              Premium:[
+                _p('MOBIL 1','M1-212','Extended Performance Oil Filter','$12.99'),
+                _p('K&N','HP-7018','High Performance Gold Oil Filter','$13.99'),
+              ]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA10163','Extra Guard Air Filter','$13.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FA-1617','OEM Air Filter; 6.8L V10','$22.99'),
+                _p('WIX','42374','Air Filter','$16.99'),
+              ],
+              Premium:[_p('K&N','33-2171','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','SP-432','OEM Spark Plug; 6.8L V10 2V; each','$6.99 ea'),
+                _p('AUTOLITE','63','Double Platinum; each','$4.99 ea'),
+                _p('NGK','TR55','V-Power; 6.8L V10; each','$4.49 ea'),
+              ],
+              Premium:[
+                _p('MOTORCRAFT','SP-432','OEM — Recommended; each','$6.99 ea'),
+                _p('AUTOLITE','XP63','XP Iridium Enhanced; each','$9.49 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','SGD757C','Service Grade Disc Brake Pad; Front','$28.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BR-1530A','Disc Brake Pad Set; Front','$44.99'),
+                _p('AKEBONO','EUR757','EURO Ultra-Premium Ceramic; Front','$52.99'),
+                _p('POWER STOP','Z23-757','Z23 Evolution Sport; Front','$48.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','9880R','R-Line Disc Brake Rotor; Front','$32.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BRCF19','Brake Rotor; Front','$54.99'),
+                _p('CENTRIC','120.65114','Premium Brake Rotor; Front','$39.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','PW-387','Engine Water Pump; 6.8L V10','$74.99'),
+                _p('GATES','43013','Premium Water Pump','$64.99'),
+                _p('DAYCO','DP815','Engine Water Pump','$59.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BXT65-750','Battery; Group 65; 750 CCA','$169.99'),
+                _p('DURALAST','65-DL','Group 65; 750 CCA','$139.99'),
+                _p('OPTIMA','8014-045','YellowTop; D65; 620 CCA','$249.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','WW-2118','Wiper Blade Set; 21in/18in','$24.99'),
+                _p('BOSCH','4826','ICON Beam; 26in Driver','$18.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── Ford 6.2L V8 Boss (F-250/350/450, E-350 2011+) */
+        { id:'ford_62_boss', label:'Ford 6.2L V8 Boss',
+          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && !fu.includes('Diesel') && di.startsWith('6.2') && yr>=2011,
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK6PK2058','Serpentine Belt; 6-Rib','$13.99')],
+                'Standard Replacement':[
+                  _p('GATES','K060840','Micro-V Serpentine Belt; 6.2L Boss','$17.99'),
+                  _p('DAYCO','5060840','Serpentine Belt','$16.49'),
+                  _p('CONTINENTAL','4060840','Multi V-Belt; 6-Rib','$17.99'),
+                ]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-233','Belt Tensioner','$32.99')],
+                'Standard Replacement':[
+                  _p('GATES','38510','DriveAlign Automatic Belt Tensioner','$49.99'),
+                  _p('DAYCO','89619','Automatic Belt Tensioner','$45.99'),
+                  _p('MOTORCRAFT','BT129','Drive Belt Tensioner; 6.2L','$59.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH3614','Extra Guard Spin-On Oil Filter','$5.49')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FL-820S','OEM Oil Filter; 6.2L Boss','$9.99'),
+                _p('WIX','51069','Spin-On Oil Filter','$7.99'),
+                _p('PUROLATOR','PL14459','PureONE Oil Filter','$8.49'),
+              ],
+              Premium:[_p('MOBIL 1','M1-212','Extended Performance Oil Filter','$12.99')]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA10163','Extra Guard Air Filter','$13.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FA-1917','OEM Air Filter; 6.2L Boss','$22.99'),
+                _p('WIX','42374','Air Filter','$16.99'),
+              ],
+              Premium:[_p('K&N','33-2171','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','SP-534','OEM Spark Plug; 6.2L Boss; each','$8.99 ea'),
+                _p('NGK','TR5','V-Power; 6.2L Boss; each','$4.49 ea'),
+                _p('AUTOLITE','64','Double Platinum; each','$4.99 ea'),
+              ],
+              Premium:[
+                _p('MOTORCRAFT','SP-534','OEM — Recommended; each','$8.99 ea'),
+                _p('NGK','6510','Iridium IX; each','$11.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BR-1530A','Disc Brake Pad Set; Front','$44.99'),
+                _p('AKEBONO','EUR757','EURO Ultra-Premium Ceramic; Front','$52.99'),
+                _p('POWER STOP','Z23-757','Z23 Evolution Sport; Front','$48.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BRCF19','Brake Rotor; Front','$54.99'),
+                _p('CENTRIC','120.65114','Premium Brake Rotor; Front','$39.99'),
+                _p('POWER STOP','AR8596','Evolution Coated Rotor; Front','$44.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BXT65-750','Battery; Group 65; 750 CCA','$169.99'),
+                _p('DURALAST','65-DL','Group 65; 750 CCA','$139.99'),
+                _p('OPTIMA','8014-045','YellowTop; D65; 620 CCA','$249.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','WW-2118','Wiper Blade Set; 21in/18in','$24.99'),
+                _p('BOSCH','4826','ICON Beam; 26in Driver','$18.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── Ford Transit 3.5L EcoBoost V6 (2015+) */
+        { id:'ford_transit_eb', label:'Ford Transit 3.5L EcoBoost V6',
+          match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && mo.includes('TRANSIT') && !fu.includes('Diesel') && di.startsWith('3.5'),
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                'Standard Replacement':[
+                  _p('GATES','K060813','Micro-V Serpentine Belt; Transit 3.5L','$17.99'),
+                  _p('DAYCO','5060813','Serpentine Belt','$15.99'),
+                  _p('CONTINENTAL','4060813','Multi V-Belt; 6-Rib','$18.49'),
+                ]
+              },
+              'Belt Tensioner':{
+                'Standard Replacement':[
+                  _p('GATES','38514','DriveAlign Automatic Belt Tensioner','$48.99'),
+                  _p('MOTORCRAFT','BT155','Drive Belt Tensioner; Transit','$64.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH10575','Extra Guard Spin-On Oil Filter','$5.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FL-500S','OEM Oil Filter; Transit 3.5L EB','$9.99'),
+                _p('WIX','57356XP','XP Spin-On Oil Filter','$8.99'),
+                _p('PUROLATOR','PL10241','PureONE Oil Filter','$8.49'),
+              ],
+              Premium:[_p('MOBIL 1','M1-110A','Extended Performance Oil Filter','$12.99')]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA10553','Extra Guard Air Filter','$13.99')],
+              'Standard Replacement':[
+                _p('MOTORCRAFT','FA-1923','OEM Air Filter; Transit 3.5L EB','$24.99'),
+                _p('WIX','42833','Air Filter','$18.99'),
+              ],
+              Premium:[_p('K&N','33-2296','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','SP-520','OEM Spark Plug; Transit 3.5L EB; each','$9.99 ea'),
+                _p('NGK','IFR6T11','Iridium IX; 3.5L EB; each','$12.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BR-1241A','Disc Brake Pad Set; Front','$42.99'),
+                _p('AKEBONO','EUR1097','EURO Ultra-Premium Ceramic; Front','$54.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BRCF37','Brake Rotor; Front','$49.99'),
+                _p('CENTRIC','120.65114','Premium Brake Rotor; Front','$36.99'),
+                _p('POWER STOP','AR85107','Evolution Coated Rotor; Front','$39.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','BXT65-750','Battery; Group 65; 750 CCA','$169.99'),
+                _p('DURALAST','65-DL','Group 65; 750 CCA','$139.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('MOTORCRAFT','WW-2118','Wiper Blade Set; 21in/18in','$24.99'),
+                _p('BOSCH','4826','ICON Beam; 26in Driver','$18.99'),
+              ]
+            }
+          }
+        },
+
+        /* ── GM Savana / Express / Kodiak 6.0L V8 Gas (2001+) */
+        { id:'gm_express_60', label:'GM Express/Savana 6.0L V8',
+          match:(mk,yr,mo,di,cy,fu) => ['CHEVROLET','GMC'].includes(mk) && !fu.includes('Diesel') && di.startsWith('6.0') && cy==='8',
+          cats:{
+            'Belt Drive':{
+              'Serpentine Belt':{
+                Economy:[_p('SKP','SK6PK2060','Serpentine Belt; 6-Rib','$13.99')],
+                'Standard Replacement':[
+                  _p('GATES','K060998','Micro-V Serpentine Belt; 6.0L','$18.49'),
+                  _p('DAYCO','5060998','Serpentine Belt','$17.49'),
+                  _p('CONTINENTAL','4060998','Multi V-Belt; 6-Rib','$18.99'),
+                ]
+              },
+              'Belt Tensioner':{
+                Economy:[_p('DORMAN','419-228','Belt Tensioner','$32.99')],
+                'Standard Replacement':[
+                  _p('GATES','38228','DriveAlign Automatic Belt Tensioner','$48.99'),
+                  _p('DAYCO','89660','Automatic Belt Tensioner','$44.99'),
+                  _p('AC DELCO','12639994','OEM Belt Tensioner; 6.0L','$74.99'),
+                ]
+              },
+              'Idler Pulley':{
+                Economy:[_p('DORMAN','419-244','Idler Pulley','$19.99')],
+                'Standard Replacement':[
+                  _p('GATES','36212','Smooth Idler Pulley','$28.99'),
+                  _p('AC DELCO','15-40028','OEM Idler Pulley','$34.99'),
+                ]
+              }
+            },
+            'Oil Filter':{
+              Economy:[_p('FRAM','PH3980','Extra Guard Spin-On Oil Filter','$5.49')],
+              'Standard Replacement':[
+                _p('AC DELCO','PF64','OEM Engine Oil Filter; 6.0L','$9.99'),
+                _p('WIX','57060XP','XP Spin-On Oil Filter','$8.99'),
+                _p('PUROLATOR','PL14610','PureONE Oil Filter','$8.49'),
+              ],
+              Premium:[
+                _p('MOBIL 1','M1-206','Extended Performance Oil Filter','$12.99'),
+                _p('K&N','HP-1017','High Performance Gold Oil Filter','$13.99'),
+              ]
+            },
+            'Air Filter':{
+              Economy:[_p('FRAM','CA9545','Extra Guard Air Filter','$13.99')],
+              'Standard Replacement':[
+                _p('AC DELCO','A3119C','OEM Air Filter; 6.0L Express/Savana','$22.99'),
+                _p('WIX','42145','Air Filter','$17.99'),
+              ],
+              Premium:[_p('K&N','33-2129','High-Flow Washable/Reusable','$59.99')]
+            },
+            'Spark Plugs':{
+              'Standard Replacement':[
+                _p('AC DELCO','41-162','Iridium Spark Plug; 6.0L; each','$14.99 ea'),
+                _p('NGK','TR55','V-Power; 6.0L; each','$4.49 ea'),
+                _p('AUTOLITE','65','Copper; 6.0L; each','$3.99 ea'),
+              ],
+              Premium:[
+                _p('AC DELCO','41-162','OEM Iridium — Recommended; each','$14.99 ea'),
+                _p('NGK','IFR6T11','Iridium IX; each','$12.99 ea'),
+              ]
+            },
+            'Brake Pads (Front)':{
+              Economy:[_p('RAYBESTOS','SGD914C','Service Grade Disc Brake Pad; Front','$29.99')],
+              'Standard Replacement':[
+                _p('AC DELCO','17D914CH','OEM Advantage; Front','$44.99'),
+                _p('AKEBONO','ACT914','ProACT Ultra-Premium Ceramic; Front','$54.99'),
+                _p('POWER STOP','Z23-914','Z23 Evolution Sport; Front','$46.99'),
+              ]
+            },
+            'Brake Pads (Rear)':{
+              'Standard Replacement':[
+                _p('AC DELCO','17D1285CH','OEM Advantage Rear Brake Pads','$38.99'),
+                _p('AKEBONO','ACT1285','ProACT Ceramic; Rear','$46.99'),
+              ]
+            },
+            'Brake Rotors (Front)':{
+              Economy:[_p('RAYBESTOS','780452R','R-Line Disc Rotor; Front','$29.99')],
+              'Standard Replacement':[
+                _p('AC DELCO','18A81089A','OEM Advantage Disc Rotor; Front','$49.99'),
+                _p('CENTRIC','120.66046','Premium Disc Brake Rotor; Front','$36.99'),
+                _p('POWER STOP','AR82136','Evolution Coated Rotor; Front','$39.99'),
+              ]
+            },
+            'Water Pump':{
+              'Standard Replacement':[
+                _p('AC DELCO','252-752','OEM Engine Water Pump; 6.0L','$74.99'),
+                _p('GATES','43239','Premium Water Pump','$64.99'),
+                _p('DAYCO','DP967','Water Pump','$59.99'),
+              ]
+            },
+            'Battery':{
+              'Standard Replacement':[
+                _p('AC DELCO','94RAGM','OEM AGM Battery; Group 94R; 800 CCA','$219.99'),
+                _p('DURALAST','H6-DL','Group 48/H6 AGM; 760 CCA','$189.99'),
+                _p('OPTIMA','8040-218','YellowTop AGM; 800 CCA','$259.99'),
+              ]
+            },
+            'Wiper Blades':{
+              'Standard Replacement':[
+                _p('AC DELCO','902-0-21','OEM Wiper Blade; 21in Driver','$19.99'),
+                _p('BOSCH','4818','ICON Beam; 18in Passenger','$16.99'),
+              ]
+            }
+          }
+        },
+
         /* ── 2. Ford 5.4L V8 Triton 3-Valve 2004-2014 ───────── */
         { id:'ford_54_3v', label:'Ford 5.4L V8 Triton (3-Valve)',
           match:(mk,yr,mo,di,cy,fu) => mk==='FORD' && !fu.includes('Diesel') && di.startsWith('5.4') && yr>=2004 && yr<=2014,
